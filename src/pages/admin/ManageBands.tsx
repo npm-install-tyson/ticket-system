@@ -13,7 +13,7 @@ const ManageBands = () => {
   const [open, setOpen] = useState(false);
   const [bands, setBands] = useState<Band[]>([]);
 
-  const url = `http://192.168.165.169:8080/api/v1/bands/all`;
+  const url = `http://192.168.120.169:8080/api/v1/bands/all`;
 
   useEffect(() => {
     fetchData(url, setBands);
@@ -42,7 +42,7 @@ const ManageBands = () => {
       <div className="mt-8 flow-root">
         <div className="-mx-4 -my-2 overflow-x-auto sm:-mx-6 lg:-mx-8">
           <div className="inline-block min-w-full py-2 align-middle sm:px-6 lg:px-8">
-            <DataTable data="band" items={bands} setDelete={setBands} />
+            <DataTable data="band" items={bands} setItems={setBands} />
           </div>
         </div>
       </div>

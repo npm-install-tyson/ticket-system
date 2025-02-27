@@ -22,18 +22,18 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
   });
 
   const [discountData, setDiscountData] = useState<Discount>({
-    discountType: "",
+    discountType: "CHILDREN",
     discountPercentage: 0,
   });
 
   const fetchURL =
     type === "band"
-      ? `http://192.168.165.169:8080/api/v1/bands/all`
-      : `http://192.168.165.169:8080/api/v1/discounts/all-discounts`;
+      ? `http://192.168.120.169:8080/api/v1/bands/all`
+      : `http://192.168.120.169:8080/api/v1/discounts/all-discounts`;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const url = `http://192.168.165.169:8080/api/v1/${
+    const url = `http://192.168.120.169:8080/api/v1/${
       type === "band" ? "bands/create" : "discounts/create-discount"
     }`;
     try {
@@ -49,12 +49,12 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
     } finally {
       setOpen(false);
       setBandData({
-        bandId: "",
-        seatsPerBand: 0,
+        bandId: "A",
+        seatsPerBand: 20,
         price: 0,
       });
       setDiscountData({
-        discountType: "",
+        discountType: "CHILDREN",
         discountPercentage: 0,
       });
       fetchData(fetchURL, setItems);
@@ -126,7 +126,7 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
                           type="number"
                           value={bandData.seatsPerBand}
                           placeholder="20"
-                          className="appearance-none block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                          className=" block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                         />
                       </div>
                     </div>
@@ -149,6 +149,7 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
                           type="number"
                           placeholder="0.00"
                           value={bandData.price}
+                          min={0}
                           onChange={(e) =>
                             setBandData({
                               ...bandData,
@@ -156,7 +157,7 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
                             })
                           }
                           aria-describedby="price-currency"
-                          className="appearance-none block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                          className=" block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                         />
                         <div
                           id="price-currency"
@@ -176,25 +177,37 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
                       htmlFor="discountType"
                       className="block text-sm/6 font-medium text-gray-900"
                     >
-                      Discount Type
+                      Discount Name
                     </label>
                     <div className="mt-2">
                       <div className="flex items-center rounded-md bg-white px-3 outline-1 -outline-offset-1 outline-gray-300 focus-within:outline-2 focus-within:-outline-offset-2 focus-within:outline-cyan-600">
-                        <input
-                          id="discountType"
+                        <select
                           name="discountType"
-                          type="text"
-                          value={discountData.discountType}
-                          onChange={(e) =>
+                          id="discountType"
+                          onChange={(e) => {
+                            const type = e.target.value;
                             setDiscountData({
                               ...discountData,
-                              discountType: e.target.value,
-                            })
-                          }
-                          placeholder="Children Discount"
-                          aria-describedby="price-currency"
+                              discountType: type,
+                            });
+                          }}
                           className="min-w-fit grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
-                        />
+                        >
+                          {[
+                            "CHILDREN",
+                            "PENSIONERS",
+                            "SOCIAL_CLUB",
+                            "QUANTITY",
+                            "LAST_HOUR",
+                            "WEEKDAY_SPECIAL",
+                          ].map((type, index) => {
+                            return (
+                              <option key={index} value={type}>
+                                {type}
+                              </option>
+                            );
+                          })}
+                        </select>
                       </div>
                     </div>
                   </div>
@@ -218,9 +231,11 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
                               discountPercentage: parseInt(e.target.value),
                             })
                           }
+                          min={0}
+                          max={100}
                           placeholder="10"
                           aria-describedby="price-currency"
-                          className="appearance-none block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
+                          className="block min-w-0 grow py-1.5 pr-3 pl-1 text-base text-gray-900 placeholder:text-gray-400 focus:outline-none sm:text-sm/6"
                         />
                         <div
                           id="price-currency"

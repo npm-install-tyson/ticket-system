@@ -13,7 +13,7 @@ const fetchData = async (url: string, setItems: any) => {
     const data = await response.json();
     setItems(data);
   } catch (err: any) {
-    return err;
+    return null;
   }
 };
 

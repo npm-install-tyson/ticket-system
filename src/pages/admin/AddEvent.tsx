@@ -101,7 +101,7 @@ const AddEvent = () => {
       }
 
       const response = await axios.post(
-        "http://192.168.165.169:8080/event/add-event",
+        "http://192.168.120.169:8080/event/add-event",
         formDataToSend,
         {
           headers: { Accept: "application/json" },
@@ -213,7 +213,7 @@ const AddEvent = () => {
                             <span>Upload a file</span>
                             <input
                               type="file"
-                              accept="image/*"
+                              accept="image/png, image/jpeg"
                               onChange={handleImageChange}
                               className="sr-only"
                             />
@@ -221,7 +221,7 @@ const AddEvent = () => {
                           <p className="pl-1">or drag and drop</p>
                         </div>
                         <p className="text-xs/5 text-gray-600">
-                          PNG, JPG, GIF up to 10MB
+                          PNG, JPG up to 10MB
                         </p>
                       </div>
                     </div>

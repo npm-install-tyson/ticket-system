@@ -9,6 +9,10 @@ interface Event {
   endDate: string;
   imageUrl: string;
 }
+interface GENRES {
+  id: number;
+  name: string;
+}
 
 // const DUMMY_EVENTS: Event[] = [
 //   {
@@ -54,14 +58,43 @@ const EventLists = () => {
   // const eventData = DUMMY_EVENTS;
   const eventData = useLoaderData();
 
+  const genres: GENRES[] = [
+    {
+      id: 1,
+      name: "musical",
+    },
+    {
+      id: 2,
+      name: "drama",
+    },
+    {
+      id: 3,
+      name: "comedy",
+    },
+    {
+      id: 4,
+      name: "children",
+    },
+  ];
+
   return (
     <div className="mx-auto max-w-2xl lg:max-w-7xl">
       <h2 className="text-2xl font-extrabold text-gray-900">Manage Events</h2>
-      <div className="mt-8 grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
-        {eventData.map((event:Event) => (
-            <EventCard key={event.eventId} event={event} />
+
+      {eventData.length > 0 &&
+        genres.map((genre, index) => (
+          <div key={index} className="mt-8 flex flex-col">
+            <h1 className="text-xl font-bold capitalize">{genre.name}</h1>
+            <div className="mt-4 grid grid-cols-1 gap-y-12 sm:grid-cols-2 sm:gap-x-6 lg:grid-cols-4 xl:gap-x-8">
+              {eventData.map(
+                (event: Event) =>
+                  event.genre === genre.name && (
+                    <EventCard key={event.eventId} event={event} />
+                  )
+              )}
+            </div>
+          </div>
         ))}
-      </div>
     </div>
   );
 };
@@ -71,20 +104,23 @@ export default EventLists;
 // Loader function for when API is working
 export const loader = async () => {
   try {
-    const response = await fetch("http://192.168.165.169:8080/event/get-all-events", {
-      headers: {
-        "Content-Type": "application/json",
-      },
-    });
+    const response = await fetch(
+      "http://192.168.120.169:8080/event/get-all-events",
+      {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      }
+    );
     if (!response.ok) {
       throw new Error("Failed to fetch events");
     }
 
     const data = await response.json();
-    
+
     return data;
   } catch (error) {
     console.error("Error loading events:", error);
-    throw error;
+    return [];
   }
 };

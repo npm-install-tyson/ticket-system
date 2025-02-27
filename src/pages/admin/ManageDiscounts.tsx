@@ -5,15 +5,16 @@ import fetchData from "../../util/fetchAPI";
 
 interface Discounts {
   id: number;
-  discountType: string;
+  discountName: string;
   discountPercentage: number;
+  discountType: string;
 }
 
 const ManageDiscounts = () => {
   const [open, setOpen] = useState(false);
   const [discounts, setDiscounts] = useState<Discounts[]>([]);
 
-  const url = `http://192.168.165.169:8080/api/v1/discounts/all-discounts`;
+  const url = `http://192.168.120.169:8080/api/v1/discounts/all-discounts`;
 
   useEffect(() => {
     fetchData(url, setDiscounts);
@@ -45,7 +46,7 @@ const ManageDiscounts = () => {
             <DataTable
               data="discount"
               items={discounts}
-              setDelete={setDiscounts}
+              setItems={setDiscounts}
             />
           </div>
         </div>

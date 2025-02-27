@@ -1,5 +1,6 @@
+import axios from "axios";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useLoaderData, useNavigate, useParams } from "react-router";
 
 interface Seat {
   id: string;
@@ -9,38 +10,13 @@ interface Seat {
   occupied: boolean;
 }
 
-const BookSeat: React.FC = () => {
+const BookSeats: React.FC = () => {
+  const { eventId, showId } = useParams<{ eventId: string; showId: string }>();
+
+  const occupiedSeats = useLoaderData();
+
   const [seats] = useState<Seat[]>(() => {
     const allSeats: Seat[] = [];
-
-    const occupiedSeats = [
-      "C28",
-      "C30",
-      "C32",
-      "C34",
-      "C36",
-      "C38",
-      "C40",
-      "C42",
-      "C44",
-      "A4",
-      "A6",
-      "A20",
-      "A22",
-      "A34",
-      "A36",
-      "B5",
-      "B7",
-      "B9",
-      "B11",
-      "B13",
-      "B15",
-      "B17",
-      "B19",
-      "B21",
-    ];
-    console.log(JSON.stringify(occupiedSeats));
-    
 
     // Band A: 2 rows * 20 seats = 40 seats, numbers 1-40
     let seatCounterA = 1;
@@ -190,22 +166,19 @@ const BookSeat: React.FC = () => {
     seats.filter((seat) => seat.row === rowNum)
   );
 
-//   const { setOccupiedSeats } = useSeats();
+  //   const { setOccupiedSeats } = useSeats();
   const navigate = useNavigate();
 
   // Load selected seats from localStorage when component mounts
   useEffect(() => {
-    const savedSeats = localStorage.getItem("occupiedSeats");
-    if (savedSeats) {
-      setSelectedSeats(JSON.parse(savedSeats));
-    }
+    localStorage.removeItem("occupiedSeats");
+    localStorage.removeItem("countdownTimer");
+    localStorage.removeItem("seatsByBand");
   }, []);
 
-  const [isLoading, setIsLoading] = useState(false);
-
-    //   const { eventId, showId } = useParams();
-   // Count the number of seats per band type
-   const getSeatsByBand = () => {
+  //   const { eventId, showId } = useParams();
+  // Count the number of seats per band type
+  const getSeatsByBand = () => {
     return selectedSeats.reduce<{ [key: string]: number }>((acc, seat) => {
       const band = seat.charAt(0); // First letter of seat (A, B, C)
       acc[band] = (acc[band] || 0) + 1;
@@ -214,34 +187,29 @@ const BookSeat: React.FC = () => {
   };
 
   const handleContinue = async () => {
-    setIsLoading(true);
-    // try {
-    //   // Send JSON payload instead of FormData
-    //   await axios
-    //     .post(
-    //       `http://192.168.165.169:8080/api/v1/seats/verify/${eventId}/${showId}`,
-    //       selectedSeats,
-    //       {
-    //         headers: {
-    //           "Content-Type": "application/json",
-    //           Accept: "application/json",
-    //         },
-    //       }
-    //     )
-    //     .then((response) => {
-    //       if (response.status >= 200 && response.status < 300) {
-    //         navigate("/admin/events/confirm-tickets");
-    //         setOccupiedSeats(selectedSeats);
-    //       }
-    //     });
-    // } catch (error: any) {
-    //   console.error("Submission error:", error);
-    // } finally {
-    //   setIsLoading(false);
-    // }
-    navigate("/admin/events/confirm-tickets");
-    localStorage.setItem("occupiedSeats", JSON.stringify(selectedSeats));
-    localStorage.setItem("seatsByBand", JSON.stringify(getSeatsByBand())); 
+    const url = `http://192.168.120.169:8080/api/v1/seats/verify/${eventId}/${showId}`;
+    try {
+      const response = await axios.post(url, selectedSeats, {
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+      });
+
+      if (response.status === 200 && response.status < 300) {
+      }
+      navigate("confirm-tickets");
+      const occupiedSeats = {
+        selectedSeats: selectedSeats,
+        eventId: eventId,
+        showId: showId,
+        timestamp: new Date().getTime(),
+      };
+      localStorage.setItem("occupiedSeats", JSON.stringify(occupiedSeats));
+      localStorage.setItem("seatsByBand", JSON.stringify(getSeatsByBand()));
+    } catch (err: any) {
+      console.log(err); // Handle error, e.g., display an error message to the user
+    }
   };
 
   return (
@@ -314,4 +282,21 @@ const BookSeat: React.FC = () => {
   );
 };
 
-export default BookSeat;
+export default BookSeats;
+
+export const loader = async ({ params }: any) => {
+  const url = `http://192.168.120.169:8080/api/v1/seats/booked-seats/${params.eventId}/${params.showId}`;
+  try {
+    const response = await fetch(url, {
+      headers: {
+        "Content-Type": "application/json",
+        Accept: "application/json",
+      },
+    });
+    const unavailableSeats = await response.json();
+
+    return unavailableSeats;
+  } catch (err: any) {
+    return [];
+  }
+};

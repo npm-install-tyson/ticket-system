@@ -10,7 +10,7 @@ import {
   TabPanel,
   TabPanels,
 } from "@headlessui/react";
-import { Link, LoaderFunctionArgs, useLoaderData } from "react-router";
+import { LoaderFunctionArgs, useLoaderData, useNavigate } from "react-router";
 import { formatDate } from "../../util/formatdate";
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
 import axios from "axios";
@@ -127,7 +127,7 @@ const EventDetails = () => {
     try {
       // Send JSON payload instead of FormData
       await axios.post(
-        "http://192.168.165.169:8080/event/add-show-times",
+        "http://192.168.120.169:8080/event/add-show-times",
         {
           eventId: eventDetails.eventId,
           showTimes: filterData,
@@ -149,16 +149,25 @@ const EventDetails = () => {
     }
   };
 
-  const [error, setError] = useState(null);
-
   const [showTimes, setShowTimes] = useState([]);
+  const navigate = useNavigate();
 
-  const url = `http://192.168.165.169:8080/event/${eventDetails.eventId}/get-show-times`;
+  const url = `http://192.168.120.169:8080/event/${eventDetails.eventId}/get-show-times`;
 
   useEffect(() => {
     fetchData(url, setShowTimes);
   }, []);
 
+  const selectShowTimeHandler = (id: string, showTime: string) => {
+    const bookingDetails = {
+      eventName: eventDetails.name,
+      eventGenre: eventDetails.genre,
+      showTime,
+    };
+    console.log(bookingDetails);
+    localStorage.setItem("bookingDetails", JSON.stringify(bookingDetails));
+    navigate(id);
+  };
   return (
     <div className="mx-auto lg:max-w-7xl">
       {/* Product */}
@@ -252,12 +261,17 @@ const EventDetails = () => {
                         </span>
                       </div>
                       <div className="basis-1/3 flex justify-end gap-x-3">
-                        <Link
-                          to={`/admin/events/${eventDetails.eventId}/book/${showtime.id}`}
+                        <button
+                          onClick={() =>
+                            selectShowTimeHandler(
+                              showtime.id,
+                              showtime.showTime
+                            )
+                          }
                           className="bg-cyan-900 text-white rounded-md px-2 py-1 hover:bg-cyan-900"
                         >
                           Book Seats
-                        </Link>
+                        </button>
                         <button>
                           <PencilSquareIcon className="w-5 text-cyan-900 hover:text-cyan-800" />
                         </button>
@@ -504,7 +518,7 @@ export default EventDetails;
 export const loader = async ({ params }: LoaderFunctionArgs) => {
   try {
     const detailResponse = await fetch(
-      `http://192.168.165.169:8080/event/get-event?id=${params.id}`,
+      `http://192.168.120.169:8080/event/get-event?id=${params.id}`,
       {
         headers: {
           "Content-Type": "application/json",

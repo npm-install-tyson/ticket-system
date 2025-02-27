@@ -1,4 +1,4 @@
-import { NavLink } from "react-router";
+import { Link } from "react-router";
 import { formatDate } from "../util/formatdate";
 
 interface Event {
@@ -44,18 +44,18 @@ const EventCard = ({ event }: { event: Event }) => {
       </div>
 
       <div className="mt-6 gap-y-3 flex flex-col">
-        <NavLink
-          to={`/admin/events/${event.eventId}/details`}
+        <Link
+          to={`${event.eventId}`}
           className="relative flex items-center justify-center rounded-md border border-transparent bg-cyan-900 px-8 py-2 text-sm font-medium text-white hover:bg-cyan-900"
         >
           Book Ticket
-        </NavLink>
-        <NavLink
-          to={`/admin/events/${event.eventId}/edit`}
+        </Link>
+        <Link
+          to={`${event.eventId}/edit`}
           className="relative flex items-center justify-center rounded-md border border-transparent outline outline-cyan-900 bg-white px-8 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
         >
           Edit Details
-        </NavLink>
+        </Link>
       </div>
     </div>
   );
