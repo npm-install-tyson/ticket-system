@@ -1,17 +1,17 @@
-import { createBrowserRouter } from "react-router";
+import { createBrowserRouter, redirect } from "react-router";
 
 import { RouterProvider } from "react-router";
 import Home from "./pages/customer/Home";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminHome from "./pages/admin/AdminHome";
 import Layout from "./pages/customer/Layout";
-import { loader as eventLoader } from "./pages/admin/EventsLists";
+import { loader as eventLoader } from "./pages/common/EventsLists";
 import EditEventDetails from "./pages/admin/EditEventDetails";
 import AddEvent from "./pages/admin/AddEvent";
-import EventLists from "./pages/admin/EventsLists";
+import EventLists from "./pages/common/EventsLists";
 import EventDetails, {
   loader as detailsLoader,
-} from "./pages/admin/EventDetails";
+} from "./pages/common/EventDetails";
 import Error from "./pages/Error";
 import BookSeats, { loader as seatLoader } from "./pages/common/BookSeats";
 import ConfirmTickets from "./pages/common/ConfirmTickets";
@@ -22,8 +22,29 @@ import About from "./pages/customer/About";
 import Login from "./pages/auth/Login";
 import AuthLayout from "./pages/auth/AuthLayout";
 import Checkout from "./pages/common/Checkout";
+import { USER } from "./util/types";
+import AuthenticateLayout from "./pages/auth/AuthenticateLayout";
 
 const App = () => {
+  const fetchUser = () => {
+    // const userId = localStorage.getItem("userId");
+    // const user = userId && getData;
+    let user: USER = {
+      userId: "id-01",
+      name: "John Doe",
+      email: "john@example.com",
+      isAdmin: true,
+    };
+    return user;
+  };
+  const authenticationLoader = () => {
+    const user = fetchUser();
+
+    if (!user) {
+      return redirect("/auth/login");
+    }
+    return user;
+  };
   const router = createBrowserRouter([
     {
       path: "/auth",
@@ -41,6 +62,7 @@ const App = () => {
     },
     {
       path: "/",
+      loader: fetchUser,
       element: <Layout />,
       errorElement: <Error />,
       children: [
@@ -54,6 +76,7 @@ const App = () => {
         },
         {
           path: "events",
+          element: <AuthenticateLayout />,
           children: [
             {
               index: true,
@@ -67,16 +90,22 @@ const App = () => {
             },
             {
               path: ":eventId/:showId",
-              element: <BookSeats />,
-              loader: seatLoader,
-            },
-            {
-              path: ":eventId/:showId/confirm-tickets",
-              element: <ConfirmTickets />,
-            },
-            {
-              path: ":eventId/:showId/confirm-tickets/checkout",
-              element: <Checkout />,
+              loader: authenticationLoader,
+              children: [
+                {
+                  index: true,
+                  element: <BookSeats />,
+                  loader: seatLoader,
+                },
+                {
+                  path: "confirm-tickets",
+                  element: <ConfirmTickets />,
+                },
+                {
+                  path: "confirm-tickets/checkout",
+                  element: <Checkout />,
+                },
+              ],
             },
           ],
         },
@@ -85,9 +114,11 @@ const App = () => {
     {
       path: "/admin",
       element: <AdminLayout />,
+      loader: authenticationLoader,
+      errorElement: <Error />,
       children: [
         {
-          path: "dashboard",
+          index: true,
           element: <AdminHome />,
         },
         {
@@ -113,16 +144,21 @@ const App = () => {
             },
             {
               path: ":eventId/:showId",
-              element: <BookSeats />,
-              loader: seatLoader,
-            },
-            {
-              path: ":eventId/:showId/confirm-tickets",
-              element: <ConfirmTickets />,
-            },
-            {
-              path: ":eventId/:showId/confirm-tickets/checkout",
-              element: <Checkout />,
+              children: [
+                {
+                  index: true,
+                  element: <BookSeats />,
+                  loader: seatLoader,
+                },
+                {
+                  path: "confirm-tickets",
+                  element: <ConfirmTickets />,
+                },
+                {
+                  path: "confirm-tickets/checkout",
+                  element: <Checkout />,
+                },
+              ],
             },
           ],
         },

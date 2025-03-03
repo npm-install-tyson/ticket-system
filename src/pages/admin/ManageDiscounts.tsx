@@ -2,17 +2,11 @@ import { useEffect, useState } from "react";
 import DataTable from "../../components/DataTable";
 import ModalForm from "../../components/ModalForm";
 import fetchData from "../../util/fetchAPI";
-
-interface Discounts {
-  id: number;
-  discountName: string;
-  discountPercentage: number;
-  discountType: string;
-}
+import { DISCOUNT } from "../../util/types";
 
 const ManageDiscounts = () => {
   const [open, setOpen] = useState(false);
-  const [discounts, setDiscounts] = useState<Discounts[]>([]);
+  const [discounts, setDiscounts] = useState<DISCOUNT[]>([]);
 
   const url = `http://192.168.120.169:8080/api/v1/discounts/all-discounts`;
 

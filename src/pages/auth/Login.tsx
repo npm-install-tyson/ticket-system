@@ -1,6 +1,30 @@
-import { Link } from "react-router";
+import { Link, useNavigate } from "react-router";
+import { postData } from "../../services/api/fetchAPI";
+import { useState } from "react";
 
 const Login = () => {
+  const loginPath = `api/v1/auth/login`;
+  const navigate = useNavigate();
+  const [loginDetails, setLoginDetails] = useState({
+    email: "",
+    password: "",
+  });
+  const loginInputChangeHandler = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setLoginDetails((prev) => ({ ...prev, [id]: value }));
+  };
+  const loginHandler = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    postData(loginPath, loginDetails).then((response) => {
+      if (response && response.status === 200) {
+        localStorage.setItem("token", response.data.token);
+        localStorage.setItem("userId", response.data.userId);
+        navigate("/");
+      } else {
+        alert("Failed to login. Please try again.");
+      }
+    });
+  };
   return (
     <>
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
@@ -15,7 +39,7 @@ const Login = () => {
       </div>
 
       <div className="mt-10 sm:mx-auto sm:w-full sm:max-w-sm">
-        <form action="#" method="POST" className="space-y-6">
+        <form onSubmit={loginHandler} className="space-y-6">
           <div>
             <label
               htmlFor="email"
@@ -28,6 +52,8 @@ const Login = () => {
                 id="email"
                 name="email"
                 type="email"
+                value={loginDetails.email}
+                onChange={loginInputChangeHandler}
                 required
                 autoComplete="email"
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-cyan-600 sm:text-sm/6"
@@ -57,6 +83,8 @@ const Login = () => {
                 id="password"
                 name="password"
                 type="password"
+                value={loginDetails.password}
+                onChange={loginInputChangeHandler}
                 required
                 autoComplete="current-password"
                 className="block w-full rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 -outline-offset-1 outline-gray-300 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 focus:outline-cyan-600 sm:text-sm/6"

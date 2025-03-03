@@ -1,16 +1,9 @@
-import { Link } from "react-router";
+import { Link, useOutletContext } from "react-router";
 import { formatDate } from "../util/formatdate";
+import { EVENTDETAILS, USER } from "../util/types";
 
-interface Event {
-  eventId: string;
-  name: string;
-  genre: string;
-  startDate: string;
-  endDate: string;
-  imageUrl: string;
-}
-
-const EventCard = ({ event }: { event: Event }) => {
+const EventCard = ({ event }: { event: EVENTDETAILS }) => {
+  const user: USER = useOutletContext();
   const start = new Date(event.startDate);
   const end = new Date(event.endDate);
 
@@ -50,12 +43,14 @@ const EventCard = ({ event }: { event: Event }) => {
         >
           Book Ticket
         </Link>
-        <Link
-          to={`${event.eventId}/edit`}
-          className="relative flex items-center justify-center rounded-md border border-transparent outline outline-cyan-900 bg-white px-8 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
-        >
-          Edit Details
-        </Link>
+        {user && user.isAdmin && (
+          <Link
+            to={`${event.eventId}/edit`}
+            className="relative flex items-center justify-center rounded-md border border-transparent outline outline-cyan-900 bg-white px-8 py-2 text-sm font-medium text-gray-900 hover:bg-gray-200"
+          >
+            Edit Details
+          </Link>
+        )}
       </div>
     </div>
   );

@@ -16,11 +16,8 @@ import {
   Bars3Icon,
   BellIcon,
   CalendarDateRangeIcon,
-  CalendarIcon,
-  ChartPieIcon,
   ChevronRightIcon,
   Cog6ToothIcon,
-  DocumentDuplicateIcon,
   HomeIcon,
   WrenchScrewdriverIcon,
   XMarkIcon,
@@ -29,10 +26,12 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
-import { NavLink, Outlet } from "react-router";
+import { Navigate, NavLink, Outlet, useLoaderData } from "react-router";
+import { USER } from "../../util/types";
+import ProtectedLayout from "../auth/ProtectedLayout";
 
 const navigation = [
-  { name: "Dashboard", href: "/admin/dashboard", icon: HomeIcon },
+  { name: "Dashboard", href: "/admin", icon: HomeIcon },
   {
     name: "Events",
     icon: CalendarDateRangeIcon,
@@ -49,9 +48,6 @@ const navigation = [
       { name: "Discount Rates", href: "/admin/discounts" },
     ],
   },
-  { name: "Calendar", href: "/admin/calendar", icon: CalendarIcon },
-  { name: "Documents", href: "/admin/documents", icon: DocumentDuplicateIcon },
-  { name: "Reports", href: "/admin/reports", icon: ChartPieIcon },
 ];
 
 const userNavigation = [
@@ -59,9 +55,18 @@ const userNavigation = [
   { name: "Sign out", href: "#" },
 ];
 
-export default function Example() {
-  const [sidebarOpen, setSidebarOpen] = useState(false);
+const AdminLayout = () => {
+  const user: USER = useLoaderData();
 
+  if (user == null) {
+    return <Navigate to="/login" replace />;
+  }
+
+  if (user && !user.isAdmin) {
+    return <ProtectedLayout />;
+  }
+
+  const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
     <>
       <div>
@@ -369,11 +374,13 @@ export default function Example() {
 
           <main className="py-10">
             <div className="px-4 sm:px-6 lg:px-8">
-              <Outlet />
+              <Outlet context={user} />
             </div>
           </main>
         </div>
       </div>
     </>
   );
-}
+};
+
+export default AdminLayout;

@@ -1,31 +1,24 @@
 import { FormEvent, useEffect, useState } from "react";
-import { useLocation, useNavigate } from "react-router";
-import CountdownTimer from "../../components/Timer";
-import fetchData from "../../util/fetchAPI";
+import { useNavigate, useOutletContext, useParams } from "react-router";
 import { getDayOfWeek } from "../../util/getDay";
-
-interface BAND {
-  bandId: string;
-  seatsPerBand: number;
-  price: number;
-}
-
-interface BOOKINGDETAILS {
-  eventName: string;
-  eventGenre: string;
-  showTime: string;
-}
+import { BAND, EVENTDETAILS, SHOWTIME, USER } from "../../util/types";
+import { formatShowtime } from "../../util/formatShowtime";
+import TenMinuteCounter from "../../components/Timer";
+import { getData, postData } from "../../services/api/fetchAPI";
 
 // Define types for better type safety
-type CustomerType = "child" | "adult" | "pensioner";
+type CUSTOMERTYPE = "child" | "adult" | "pensioner";
 type SeatsByBand = Record<string, number>;
-type CustomerAllocation = Record<string, Record<CustomerType, number>>;
+type CustomerAllocation = Record<string, Record<CUSTOMERTYPE, number>>;
 
-const CUSTOMER_TYPES: CustomerType[] = ["child", "adult", "pensioner"];
-const TIMEOUT_DURATION = 600000; // 10 minutes in milliseconds
+const customerType: CUSTOMERTYPE[] = ["child", "adult", "pensioner"];
 
 const ConfirmTickets = () => {
+  const user: USER = useOutletContext();
+  const { eventId, showId } = useParams<{ eventId: string; showId: string }>();
   const [seatsByBand, setSeatsByBand] = useState<SeatsByBand>({});
+  const [event, setEvent] = useState<EVENTDETAILS>();
+  const [showTime, setShowTime] = useState<SHOWTIME[]>([]);
   const [isBookingForSocialClub, setIsBookingForSocialClub] = useState(false);
   const [customerAllocation, setCustomerAllocation] =
     useState<CustomerAllocation>({});
@@ -35,9 +28,21 @@ const ConfirmTickets = () => {
   ]);
 
   const navigate = useNavigate();
-  const location = useLocation();
-  const adminEventsPath = "/admin/events";
-  const currentPath = "/admin/events/confirm-tickets";
+  const BookSeatsPage = `/admin/events/${eventId}/${showId}`;
+
+  const counterEndTime = localStorage.getItem("counterEndTime");
+  const timeLeft =
+    counterEndTime &&
+    parseInt(counterEndTime, 10) - Math.floor(Date.now() / 1000);
+
+  timeLeft &&
+    setTimeout(() => {
+      localStorage.removeItem("occupiedSeats");
+      localStorage.removeItem("seatsByBand");
+      if (seatsByBand != null) {
+        navigate(BookSeatsPage);
+      }
+    }, timeLeft * 1000);
 
   // Load saved seats data and set timeout for session
   useEffect(() => {
@@ -48,34 +53,26 @@ const ConfirmTickets = () => {
     }
   }, [navigate, location.pathname]);
 
-  const [bookingDetails, setBookingDetails] = useState<BOOKINGDETAILS>({
-    eventName: "",
-    eventGenre: "",
-    showTime: "",
-  });
-
   // Fetch band data with dependency array
+  const eventPath = `event/get-event?id=${eventId}`;
+  const showTimePath = `event/${eventId}/get-show-times`;
+  const bandPath = `api/v1/bands/all`;
   useEffect(() => {
-    const bandUrl = `http://192.168.120.169:8080/api/v1/bands/all`;
-    fetchData(bandUrl, setBandData);
-    const requestBookingDetails = localStorage.getItem("bookingDetails");
-    requestBookingDetails &&
-      setBookingDetails(JSON.parse(requestBookingDetails));
+    getData(bandPath).then((data) => setBandData(data));
+    getData(eventPath).then((data) => setEvent(data));
+    getData(showTimePath)
+      .then((data) => data && setShowTime(data))
+      .then(() =>
+        setShowTime(
+          (prev: SHOWTIME[]) =>
+            prev && prev.filter((st: SHOWTIME) => st.id === showId)
+        )
+      );
   }, []);
 
-  // Set timeout for session
-  useEffect(() => {
-    const timeoutId = setTimeout(() => {
-      localStorage.removeItem("occupiedSeats");
-      localStorage.removeItem("seatsByBand");
-      if (location.pathname === currentPath) {
-        navigate(adminEventsPath);
-      }
-    }, TIMEOUT_DURATION);
-
-    // Clean up the timeout when component unmounts
-    return () => clearTimeout(timeoutId);
-  }, [location.pathname, currentPath, navigate, adminEventsPath]);
+  const formattedShowTime = formatShowtime(
+    showTime.length > 0 ? showTime[0].showTime : ""
+  );
 
   // Initialize customer allocation whenever seatsByBand changes
   useEffect(() => {
@@ -101,7 +98,7 @@ const ConfirmTickets = () => {
   // Handle changes to customer allocation for a specific band and type
   const handleAllocationChange = (
     band: string,
-    type: CustomerType,
+    type: CUSTOMERTYPE,
     value: number
   ) => {
     if (value < 0) return; // Prevent negative values
@@ -179,7 +176,7 @@ const ConfirmTickets = () => {
       },
     };
 
-    const updatedBand = isBookingForSocialClub
+    const updatedBand = !isBookingForSocialClub
       ? {
           ...band,
           ...Object.keys(customerAllocation).reduce((acc, key) => {
@@ -194,17 +191,17 @@ const ConfirmTickets = () => {
       : {
           A: {
             child: 0,
-            adult: seatsByBand.A,
+            adult: seatsByBand.A || 0,
             pensioner: 0,
           },
           B: {
             child: 0,
-            adult: seatsByBand.B,
+            adult: seatsByBand.B || 0,
             pensioner: 0,
           },
           C: {
             child: 0,
-            adult: seatsByBand.C,
+            adult: seatsByBand.C || 0,
             pensioner: 0,
           },
         };
@@ -213,13 +210,14 @@ const ConfirmTickets = () => {
       bands: updatedBand,
       isSocialClub: isBookingForSocialClub,
       totalTickets,
-      day: getDayOfWeek(bookingDetails.showTime),
-      showTime: bookingDetails.showTime,
+      day: getDayOfWeek(showTime.length > 0 && showTime[0].showTime),
+      showTime: showTime.length > 0 && showTime[0].showTime,
     };
 
-    localStorage.setItem("requestData", JSON.stringify(requestData));
-
-    navigate("checkout");
+    const path = "api/v1/discounts/calculate";
+    postData(path, requestData).then((data) =>
+      navigate("checkout", { state: { discount: JSON.stringify(data) } })
+    );
   };
 
   // Input control handlers
@@ -236,7 +234,7 @@ const ConfirmTickets = () => {
 
   const allocationsAndDiscount = (
     band: string,
-    type: CustomerType,
+    type: CUSTOMERTYPE,
     e: string
   ) => {
     handleAllocationChange(band, type, parseInt(e, 10) || 0);
@@ -248,12 +246,22 @@ const ConfirmTickets = () => {
   }
 
   return (
-    <div className="mx-auto max-w-3xl">
+    <div className="mx-auto max-w-3xl bg-[url()]">
       <div className="flex-col flex">
         <h1 className="text-3xl text-center py-4 font-bold tracking-tight text-gray-900 sm:text-4xl">
-          Confirm Your Tickets
+          Confirm Your Tickets for
         </h1>
-        <CountdownTimer />
+        <div className="flex justify-between mt-6">
+          <h1 className="text-2xl font-bold mb-4 text-center">
+            {event?.name} <span className="capitalize">({event?.genre})</span>
+          </h1>
+          <h1 className="text-2xl font-bold mb-4 text-center">
+            {formattedShowTime.date} at {formattedShowTime.time}
+          </h1>
+        </div>
+        <h1 className="text-end text-xl font-medium">
+          <TenMinuteCounter />
+        </h1>
       </div>
       <form className="" onSubmit={handleContinue}>
         {/* Ticket selection section */}
@@ -286,7 +294,7 @@ const ConfirmTickets = () => {
                 )}
 
                 {/* Render customer type inputs for each band */}
-                {CUSTOMER_TYPES.map((type) => (
+                {customerType.map((type) => (
                   <div key={type} className="flex items-center gap-2">
                     <label className="capitalize">{type}: </label>
                     <input
@@ -307,18 +315,20 @@ const ConfirmTickets = () => {
             ))}
 
             {/* Social club checkbox */}
-            <li className="flex py-6 sm:py-10 gap-x-3">
-              <input
-                type="checkbox"
-                name="socialClub"
-                id="socialClub"
-                checked={isBookingForSocialClub}
-                onChange={handleSocialClubChange}
-              />
-              <label htmlFor="socialClub">
-                Booking tickets for Social Club?
-              </label>
-            </li>
+            {user && user.isAdmin && (
+              <li className="flex py-6 sm:py-10 gap-x-3">
+                <input
+                  type="checkbox"
+                  name="socialClub"
+                  id="socialClub"
+                  checked={isBookingForSocialClub}
+                  onChange={handleSocialClubChange}
+                />
+                <label htmlFor="socialClub">
+                  Booking tickets for Social Club?
+                </label>
+              </li>
+            )}
             <li className="py-6 sm:py-10 flex justify-center items-center">
               <button
                 disabled={totalRemainingSeats > 0 && !isBookingForSocialClub}

@@ -2,26 +2,16 @@ import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
 import axios from "axios";
 import { FormEvent, useState } from "react";
 import fetchData from "../util/fetchAPI";
-
-interface Band {
-  bandId: string;
-  seatsPerBand: number;
-  price: number;
-}
-
-interface Discount {
-  discountType: string;
-  discountPercentage: number;
-}
+import { BAND, DISCOUNT } from "../util/types";
 
 const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
-  const [bandData, setBandData] = useState<Band>({
+  const [bandData, setBandData] = useState<BAND>({
     bandId: "A",
     seatsPerBand: 20,
     price: 0,
   });
 
-  const [discountData, setDiscountData] = useState<Discount>({
+  const [discountData, setDiscountData] = useState<DISCOUNT>({
     discountType: "CHILDREN",
     discountPercentage: 0,
   });

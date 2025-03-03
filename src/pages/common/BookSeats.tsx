@@ -1,7 +1,10 @@
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { useLoaderData, useNavigate, useParams } from "react-router";
+import { EVENTDETAILS, SHOWTIME } from "../../util/types";
+import { formatShowtime } from "../../util/formatShowtime";
+import { getData, postData } from "../../services/api/fetchAPI";
 
+// Type definitions
 interface Seat {
   id: string;
   band: "A" | "B" | "C";
@@ -10,293 +13,427 @@ interface Seat {
   occupied: boolean;
 }
 
+interface SeatsByBand {
+  [key: string]: number;
+}
+
+interface OccupiedSeatsStorage {
+  selectedSeats: string[];
+  eventId: string;
+  showId: string;
+  timestamp: number;
+}
+
+// Constants
+const PRICE_BY_BAND = {
+  A: 25,
+  B: 15,
+  C: 10,
+};
+
+// Component
 const BookSeats: React.FC = () => {
   const { eventId, showId } = useParams<{ eventId: string; showId: string }>();
-
-  const occupiedSeats = useLoaderData();
-
-  const [seats] = useState<Seat[]>(() => {
-    const allSeats: Seat[] = [];
-
-    // Band A: 2 rows * 20 seats = 40 seats, numbers 1-40
-    let seatCounterA = 1;
-    for (let row = 1; row <= 2; row++) {
-      for (let num = 1; num <= 20; num++) {
-        allSeats.push({
-          id: `A${seatCounterA}`,
-          band: "A",
-          row,
-          number: seatCounterA,
-          occupied: occupiedSeats.includes(`A${seatCounterA}`),
-        });
-        seatCounterA++;
-      }
-    }
-
-    // Band B: 3 rows * 20 seats = 60 seats, numbers 1-60
-    let seatCounterB = 1;
-    for (let row = 3; row <= 6; row++) {
-      for (let num = 1; num <= 20; num++) {
-        allSeats.push({
-          id: `B${seatCounterB}`,
-          band: "B",
-          row,
-          number: seatCounterB,
-          occupied: occupiedSeats.includes(`B${seatCounterB}`),
-        });
-        seatCounterB++;
-      }
-    }
-
-    // Band C: 4 rows * 20 seats = 80 seats, numbers 1-80
-    let seatCounterC = 1;
-    for (let row = 7; row <= 10; row++) {
-      for (let num = 1; num <= 20; num++) {
-        allSeats.push({
-          id: `C${seatCounterC}`,
-          band: "C",
-          row,
-          number: seatCounterC,
-          occupied: occupiedSeats.includes(`C${seatCounterC}`),
-        });
-        seatCounterC++;
-      }
-    }
-
-    return allSeats;
-  });
+  // const [bandData, setBandData] = useState<BAND[]>([]);
+  const [event, setEvent] = useState<EVENTDETAILS>();
+  const [showTime, setShowTime] = useState<SHOWTIME[]>([]);
+  const occupiedSeats = useLoaderData() as string[];
+  const navigate = useNavigate();
 
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
+  const [seats] = useState<Seat[]>(() => generateSeats(occupiedSeats));
 
+  // Clear localStorage on component mount
+  const eventPath = `event/get-event?id=${eventId}`;
+  const showTimePath = `event/${eventId}/get-show-times`;
+  useEffect(() => {
+    clearLocalStorage();
+    // fetchData(`${API_BASE_URL}/bands/all`, setBandData);
+    getData(eventPath).then((data) => setEvent(data));
+    getData(showTimePath)
+      .then((data) => data && setShowTime(data))
+      .then(() =>
+        setShowTime(
+          (prev: SHOWTIME[]) =>
+            prev && prev.filter((st: SHOWTIME) => st.id === showId)
+        )
+      );
+  }, []);
+
+  const formattedShowTime = formatShowtime(
+    showTime.length > 0 ? showTime[0].showTime : ""
+  );
+
+  // Seat click handler
   const handleSeatClick = (seat: Seat) => {
     if (seat.occupied) return;
 
-    setSelectedSeats((prev) => {
-      if (prev.includes(seat.id)) {
-        return prev.filter((id) => id !== seat.id);
-      }
-      return [...prev, seat.id];
-    });
-  };
-
-  const totalPrice = selectedSeats.reduce((total, seatId) => {
-    const seat = seats.find((s) => s.id === seatId);
-    if (!seat) return total;
-    return total + (seat.band === "A" ? 50 : seat.band === "B" ? 35 : 20);
-  }, 0);
-
-  const renderRow = (rowSeats: Seat[]) => {
-    const leftSection = rowSeats.slice(0, 6);
-    const middleSection = rowSeats.slice(6, 14);
-    const rightSection = rowSeats.slice(14, 20);
-
-    return (
-      <div className="flex justify-center items-center gap-6 mb-2">
-        <div className="flex gap-2">
-          {leftSection.map((seat) => (
-            <div
-              key={seat.id}
-              className={`w-10 h-10 rounded cursor-pointer transition-colors flex items-center justify-center text-sm
-                ${
-                  seat.occupied
-                    ? "border-2 border-gray-400 text-white  cursor-not-allowed bg-gray-400"
-                    : "border-2 border-gray-500 text-black  hover:border-cyan-800 hover:bg-cyan-800 hover:text-white"
-                }
-                ${
-                  selectedSeats.includes(seat.id)
-                    ? "border-cyan-900 bg-cyan-900 text-white"
-                    : ""
-                }`}
-              onClick={() => handleSeatClick(seat)}
-              title={`Band ${seat.band} - Row ${seat.row} - Seat ${seat.number}`}
-            >
-              {seat.number}
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          {middleSection.map((seat) => (
-            <div
-              key={seat.id}
-              className={`w-10 h-10 rounded cursor-pointer transition-colors flex items-center justify-center text-sm
-                ${
-                  seat.occupied
-                    ? "border-2 border-gray-400 text-white  cursor-not-allowed bg-gray-400"
-                    : "border-2 border-gray-500 text-black  hover:border-cyan-800 hover:bg-cyan-800 hover:text-white"
-                }
-                ${
-                  selectedSeats.includes(seat.id)
-                    ? "border-cyan-900 bg-cyan-900 text-white"
-                    : ""
-                }`}
-              onClick={() => handleSeatClick(seat)}
-              title={`Band ${seat.band} - Row ${seat.row} - Seat ${seat.number}`}
-            >
-              {seat.number}
-            </div>
-          ))}
-        </div>
-        <div className="flex gap-2">
-          {rightSection.map((seat) => (
-            <div
-              key={seat.id}
-              className={`w-10 h-10 rounded cursor-pointer transition-colors flex items-center justify-center text-sm
-                ${
-                  seat.occupied
-                    ? "border-2 border-gray-400 text-white  cursor-not-allowed bg-gray-400"
-                    : "border-2 border-gray-500 text-black  hover:border-cyan-800 hover:bg-cyan-800 hover:text-white"
-                }
-                ${
-                  selectedSeats.includes(seat.id)
-                    ? "border-cyan-900 bg-cyan-900 text-white"
-                    : ""
-                }`}
-              onClick={() => handleSeatClick(seat)}
-              title={`Band ${seat.band} - Row ${seat.row} - Seat ${seat.number}`}
-            >
-              {seat.number}
-            </div>
-          ))}
-        </div>
-      </div>
+    setSelectedSeats((prev) =>
+      prev.includes(seat.id)
+        ? prev.filter((id) => id !== seat.id)
+        : [...prev, seat.id]
     );
   };
 
+  // Calculate total price
+  const totalPrice = calculateTotalPrice(seats, selectedSeats);
+
+  // Continue button handler
+  const handleContinue = async () => {
+    try {
+      await verifySeats(eventId, showId, selectedSeats);
+      saveToLocalStorage(eventId, showId, selectedSeats);
+      navigate("confirm-tickets");
+    } catch (err) {
+      // Add error handling here
+    }
+  };
+
+  // Group seats by row
   const rows = Array.from({ length: 10 }, (_, i) => i + 1).map((rowNum) =>
     seats.filter((seat) => seat.row === rowNum)
   );
 
-  //   const { setOccupiedSeats } = useSeats();
-  const navigate = useNavigate();
-
-  // Load selected seats from localStorage when component mounts
-  useEffect(() => {
-    localStorage.removeItem("occupiedSeats");
-    localStorage.removeItem("countdownTimer");
-    localStorage.removeItem("seatsByBand");
-  }, []);
-
-  //   const { eventId, showId } = useParams();
-  // Count the number of seats per band type
-  const getSeatsByBand = () => {
-    return selectedSeats.reduce<{ [key: string]: number }>((acc, seat) => {
-      const band = seat.charAt(0); // First letter of seat (A, B, C)
-      acc[band] = (acc[band] || 0) + 1;
-      return acc;
-    }, {});
-  };
-
-  const handleContinue = async () => {
-    const url = `http://192.168.120.169:8080/api/v1/seats/verify/${eventId}/${showId}`;
-    try {
-      const response = await axios.post(url, selectedSeats, {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      });
-
-      if (response.status === 200 && response.status < 300) {
-      }
-      navigate("confirm-tickets");
-      const occupiedSeats = {
-        selectedSeats: selectedSeats,
-        eventId: eventId,
-        showId: showId,
-        timestamp: new Date().getTime(),
-      };
-      localStorage.setItem("occupiedSeats", JSON.stringify(occupiedSeats));
-      localStorage.setItem("seatsByBand", JSON.stringify(getSeatsByBand()));
-    } catch (err: any) {
-      console.log(err); // Handle error, e.g., display an error message to the user
-    }
-  };
-
   return (
-    <div className="min-h-screen text-black">
-      <h1 className="text-2xl font-bold mb-4 text-center">
-        Community Theater Seating
+    <div className="min-h-screen text-black max-w-5xl mx-auto">
+      <h1 className="text-2xl font-bold mb-6 text-center">
+        Choose your seats for
       </h1>
+      <div className="flex justify-between">
+        <h1 className="text-2xl font-bold mb-4 text-center">
+          {event?.name} <span className="capitalize">({event?.genre})</span>
+        </h1>
+        <h1 className="text-2xl font-bold mb-4 text-center">
+          {formattedShowTime.date} at {formattedShowTime.time}
+        </h1>
+      </div>
 
       <div className="max-w-5xl mx-auto">
         {/* Stage */}
-        <div className="bg-gray-300 h-16 mb-8 flex items-center justify-center rounded">
-          <span className="text-xl">Stage</span>
-        </div>
+        <StageSection />
 
         {/* Seating Area */}
-        <div className=" overflow-y-auto overflow-x-auto">
-          <div className="min-w-fit">
-            <div className="text-center mb-2 text-lg font-semibold">Band A</div>
-            {rows.slice(0, 2).map((rowSeats, index) => (
-              <div key={index}>{renderRow(rowSeats)}</div>
-            ))}
-
-            <div className="text-center mb-2 text-lg font-semibold mt-5">
-              Band B
-            </div>
-            {rows.slice(2, 6).map((rowSeats, index) => (
-              <div key={index + 2}>{renderRow(rowSeats)}</div>
-            ))}
-
-            <div className="text-center mb-2 text-lg font-semibold mt-5">
-              Band C
-            </div>
-            {rows.slice(6, 10).map((rowSeats, index) => (
-              <div key={index + 5}>{renderRow(rowSeats)}</div>
-            ))}
-          </div>
-        </div>
+        <SeatingArea
+          rows={rows}
+          selectedSeats={selectedSeats}
+          onSeatClick={handleSeatClick}
+        />
 
         {/* Legend */}
-        <div className="mt-6 flex justify-center gap-6">
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-gray-500 rounded " />
-            <span>Available</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-cyan-900 bg-cyan-900 rounded " />
-            <span>Selected</span>
-          </div>
-          <div className="flex items-center gap-2">
-            <div className="w-4 h-4 border-2 border-gray-400 bg-gray-400 rounded " />
-            <span>Occupied</span>
-          </div>
-        </div>
+        <SeatLegend />
 
         {/* Selected Seats Info */}
         {selectedSeats.length > 0 && (
-          <div className="mt-4 text-center">
-            <p>Selected Seats: {selectedSeats.length}</p>
-            <p>Total Price: ${totalPrice}</p>
-            <button
-              className="px-2 py-1 rounded-md bg-cyan-900 hover:bg-cyan-800 text-white mt-4"
-              onClick={handleContinue}
-            >
-              Continue
-            </button>
-          </div>
+          <SelectedSeatsInfo
+            selectedSeats={selectedSeats}
+            totalPrice={totalPrice}
+            onContinue={handleContinue}
+          />
         )}
       </div>
     </div>
   );
 };
 
+// Helper Components
+const StageSection: React.FC = () => (
+  <div className="bg-gray-300 h-16 mb-8 flex items-center justify-center rounded">
+    <span className="text-xl">Stage</span>
+  </div>
+);
+
+const SeatLegend: React.FC = () => (
+  <div className="mt-6 flex justify-center gap-6">
+    <div className="flex items-center gap-2">
+      <div className="w-4 h-4 border-2 border-gray-500 rounded" />
+      <span>Available</span>
+    </div>
+    <div className="flex items-center gap-2">
+      <div className="w-4 h-4 border-2 border-cyan-900 bg-cyan-900 rounded" />
+      <span>Selected</span>
+    </div>
+    <div className="flex items-center gap-2">
+      <div className="w-4 h-4 border-2 border-gray-400 bg-gray-400 rounded" />
+      <span>Occupied</span>
+    </div>
+  </div>
+);
+
+interface SelectedSeatsInfoProps {
+  selectedSeats: string[];
+  totalPrice: number;
+  onContinue: () => void;
+}
+
+const SelectedSeatsInfo: React.FC<SelectedSeatsInfoProps> = ({
+  selectedSeats,
+  totalPrice,
+  onContinue,
+}) => (
+  <div className="mt-4 text-center">
+    <p>Selected Seats: {selectedSeats.length}</p>
+    <p>Total Price: ${totalPrice}</p>
+    <button
+      className="px-2 py-1 rounded-md bg-cyan-900 hover:bg-cyan-800 text-white mt-4"
+      onClick={onContinue}
+    >
+      Continue
+    </button>
+  </div>
+);
+
+interface SeatingAreaProps {
+  rows: Seat[][];
+  selectedSeats: string[];
+  onSeatClick: (seat: Seat) => void;
+}
+
+const SeatingArea: React.FC<SeatingAreaProps> = ({
+  rows,
+  selectedSeats,
+  onSeatClick,
+}) => (
+  <div className="overflow-y-auto overflow-x-auto">
+    <div className="min-w-fit">
+      <div className="text-center mb-2 text-lg font-semibold">Band A</div>
+      {rows.slice(0, 2).map((rowSeats, index) => (
+        <div key={`a-${index}`}>
+          <SeatRow
+            rowSeats={rowSeats}
+            selectedSeats={selectedSeats}
+            onSeatClick={onSeatClick}
+          />
+        </div>
+      ))}
+
+      <div className="text-center mb-2 text-lg font-semibold mt-5">Band B</div>
+      {rows.slice(2, 6).map((rowSeats, index) => (
+        <div key={`b-${index}`}>
+          <SeatRow
+            rowSeats={rowSeats}
+            selectedSeats={selectedSeats}
+            onSeatClick={onSeatClick}
+          />
+        </div>
+      ))}
+
+      <div className="text-center mb-2 text-lg font-semibold mt-5">Band C</div>
+      {rows.slice(6, 10).map((rowSeats, index) => (
+        <div key={`c-${index}`}>
+          <SeatRow
+            rowSeats={rowSeats}
+            selectedSeats={selectedSeats}
+            onSeatClick={onSeatClick}
+          />
+        </div>
+      ))}
+    </div>
+  </div>
+);
+
+interface SeatRowProps {
+  rowSeats: Seat[];
+  selectedSeats: string[];
+  onSeatClick: (seat: Seat) => void;
+}
+
+const SeatRow: React.FC<SeatRowProps> = ({
+  rowSeats,
+  selectedSeats,
+  onSeatClick,
+}) => {
+  const leftSection = rowSeats.slice(0, 6);
+  const middleSection = rowSeats.slice(6, 14);
+  const rightSection = rowSeats.slice(14, 20);
+
+  return (
+    <div className="flex justify-center items-center gap-6 mb-2">
+      <SeatSection
+        seats={leftSection}
+        selectedSeats={selectedSeats}
+        onSeatClick={onSeatClick}
+      />
+      <SeatSection
+        seats={middleSection}
+        selectedSeats={selectedSeats}
+        onSeatClick={onSeatClick}
+      />
+      <SeatSection
+        seats={rightSection}
+        selectedSeats={selectedSeats}
+        onSeatClick={onSeatClick}
+      />
+    </div>
+  );
+};
+
+interface SeatSectionProps {
+  seats: Seat[];
+  selectedSeats: string[];
+  onSeatClick: (seat: Seat) => void;
+}
+
+const SeatSection: React.FC<SeatSectionProps> = ({
+  seats,
+  selectedSeats,
+  onSeatClick,
+}) => (
+  <div className="flex gap-2">
+    {seats.map((seat) => (
+      <SeatButton
+        key={seat.id}
+        seat={seat}
+        isSelected={selectedSeats.includes(seat.id)}
+        onClick={() => onSeatClick(seat)}
+      />
+    ))}
+  </div>
+);
+
+interface SeatButtonProps {
+  seat: Seat;
+  isSelected: boolean;
+  onClick: () => void;
+}
+
+const SeatButton: React.FC<SeatButtonProps> = ({
+  seat,
+  isSelected,
+  onClick,
+}) => {
+  const getSeatClassName = () => {
+    const baseClass =
+      "w-10 h-10 rounded cursor-pointer transition-colors flex items-center justify-center text-sm";
+
+    if (seat.occupied) {
+      return `${baseClass} border-2 border-gray-400 text-white cursor-not-allowed bg-gray-400`;
+    }
+
+    const availableClass = `${baseClass} border-2 border-gray-500 text-black hover:border-cyan-800 hover:bg-cyan-800 hover:text-white`;
+
+    return isSelected
+      ? `${availableClass} border-cyan-900 bg-cyan-900 text-white`
+      : availableClass;
+  };
+
+  return (
+    <div
+      className={getSeatClassName()}
+      onClick={onClick}
+      title={`Band ${seat.band} - Row ${seat.row} - Seat ${seat.number}`}
+    >
+      {seat.number}
+    </div>
+  );
+};
+
+// Helper Functions
+function generateSeats(occupiedSeats: string[]): Seat[] {
+  const allSeats: Seat[] = [];
+
+  // Band A: 2 rows * 20 seats = 40 seats
+  generateBandSeats("A", 1, 2, 20, occupiedSeats, allSeats);
+
+  // Band B: 4 rows * 20 seats = 80 seats
+  generateBandSeats("B", 3, 6, 20, occupiedSeats, allSeats);
+
+  // Band C: 4 rows * 20 seats = 80 seats
+  generateBandSeats("C", 7, 10, 20, occupiedSeats, allSeats);
+
+  return allSeats;
+}
+
+function generateBandSeats(
+  band: "A" | "B" | "C",
+  startRow: number,
+  endRow: number,
+  seatsPerRow: number,
+  occupiedSeats: string[],
+  allSeats: Seat[]
+): void {
+  let seatCounter = 1;
+
+  for (let row = startRow; row <= endRow; row++) {
+    for (let num = 1; num <= seatsPerRow; num++) {
+      const seatId = `${band}${seatCounter}`;
+
+      allSeats.push({
+        id: seatId,
+        band,
+        row,
+        number: seatCounter,
+        occupied: occupiedSeats.includes(seatId),
+      });
+
+      seatCounter++;
+    }
+  }
+}
+
+function calculateTotalPrice(seats: Seat[], selectedSeats: string[]): number {
+  return selectedSeats.reduce((total, seatId) => {
+    const seat = seats.find((s) => s.id === seatId);
+    if (!seat) return total;
+    return total + PRICE_BY_BAND[seat.band];
+  }, 0);
+}
+
+function clearLocalStorage(): void {
+  localStorage.removeItem("occupiedSeats");
+  localStorage.removeItem("countdownTimer");
+  localStorage.removeItem("seatsByBand");
+  localStorage.removeItem("counterEndTime");
+}
+
+function getSeatsByBand(selectedSeats: string[]): SeatsByBand {
+  return selectedSeats.reduce<SeatsByBand>((acc, seat) => {
+    const band = seat.charAt(0); // First letter of seat (A, B, C)
+    acc[band] = (acc[band] || 0) + 1;
+    return acc;
+  }, {});
+}
+
+async function verifySeats(
+  eventId: string | undefined,
+  showId: string | undefined,
+  selectedSeats: string[]
+): Promise<void> {
+  if (!eventId || !showId) {
+    throw new Error("Event ID or Show ID is missing");
+  }
+  const path = `api/v1/seats/verify/${eventId}/${showId}`;
+  postData(path, selectedSeats);
+}
+
+function saveToLocalStorage(
+  eventId: string | undefined,
+  showId: string | undefined,
+  selectedSeats: string[]
+): void {
+  if (!eventId || !showId) return;
+
+  const occupiedSeats: OccupiedSeatsStorage = {
+    selectedSeats,
+    eventId,
+    showId,
+    timestamp: new Date().getTime(),
+  };
+
+  localStorage.setItem("occupiedSeats", JSON.stringify(occupiedSeats));
+  localStorage.setItem(
+    "seatsByBand",
+    JSON.stringify(getSeatsByBand(selectedSeats))
+  );
+}
+
 export default BookSeats;
 
+// Loader function
 export const loader = async ({ params }: any) => {
-  const url = `http://192.168.120.169:8080/api/v1/seats/booked-seats/${params.eventId}/${params.showId}`;
-  try {
-    const response = await fetch(url, {
-      headers: {
-        "Content-Type": "application/json",
-        Accept: "application/json",
-      },
-    });
-    const unavailableSeats = await response.json();
-
-    return unavailableSeats;
-  } catch (err: any) {
+  if (!params.eventId || !params.showId) {
     return [];
   }
+  const path = `api/v1/seats/booked-seats/${params.eventId}/${params.showId}`;
+  const response = getData(path).then((data) => data || []);
+  return await response;
 };

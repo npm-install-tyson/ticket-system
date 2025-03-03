@@ -2,16 +2,11 @@ import { useEffect, useState } from "react";
 import DataTable from "../../components/DataTable";
 import ModalForm from "../../components/ModalForm";
 import fetchData from "../../util/fetchAPI";
-
-interface Band {
-  bandId: string;
-  seatsPerBand: number;
-  price: number;
-}
+import { BAND } from "../../util/types";
 
 const ManageBands = () => {
   const [open, setOpen] = useState(false);
-  const [bands, setBands] = useState<Band[]>([]);
+  const [bands, setBands] = useState<BAND[]>([]);
 
   const url = `http://192.168.120.169:8080/api/v1/bands/all`;
 

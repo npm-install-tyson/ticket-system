@@ -58,8 +58,6 @@ const AdminHome = () => {
   //   showTime: "2025-02-26T20:45:00",
   // };
 
-  // console.log(calculateDiscount(data));
-
   return (
     <div className="mx-auto max-w-2xl lg:max-w-7xl">
       <div className="flex-col lg:flex-row gap-y-6 lg:gap-y-0 flex justify-center items-start gap-x-6">

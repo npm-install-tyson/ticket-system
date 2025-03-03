@@ -1,40 +1,24 @@
 import { PhotoIcon } from "@heroicons/react/24/solid";
 import { useState, ChangeEvent, FormEvent } from "react";
-import axios from "axios";
 import FormField from "../../components/FormField";
 import { v4 as uuidv4 } from "uuid";
+import { EVENTDETAILS, GENRE } from "../../util/types";
+import { postEventData } from "../../services/api/fetchAPI";
 
-interface FormData {
-  name: string;
-  description: string;
-  genre: string;
-  startDate: string;
-  endDate: string;
-  runTimeHour: string;
-  runTimeMin: string;
-  producer: string;
-  director: string;
-}
-
-const GENRES: Genre[] = [
+const genres: GENRE[] = [
   { id: 1, name: "musical" },
   { id: 2, name: "drama" },
   { id: 3, name: "comedy" },
   { id: 4, name: "children" },
 ];
 
-interface Genre {
-  id: number;
-  name: string;
-}
-
 const HOURS = [1, 2, 3, 4, 5];
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
 
-const INITIAL_FORM_STATE: FormData = {
+const INITIAL_FORM_STATE: EVENTDETAILS = {
   name: "",
   description: "",
-  genre: GENRES[0].name,
+  genre: genres[0].name,
   startDate: "",
   endDate: "",
   runTimeHour: HOURS[0].toString(),
@@ -44,7 +28,7 @@ const INITIAL_FORM_STATE: FormData = {
 };
 
 const AddEvent = () => {
-  const [formData, setFormData] = useState<FormData>(INITIAL_FORM_STATE);
+  const [formData, setFormData] = useState<EVENTDETAILS>(INITIAL_FORM_STATE);
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<string>("");
   const [message, setMessage] = useState<string>("");
@@ -70,54 +54,40 @@ const AddEvent = () => {
     setIsLoading(true);
     setMessage("");
 
-    try {
-      const startDate = new Date(formData.startDate);
-      const endDate = new Date(formData.endDate);
+    // try {
+    const startDate = new Date(formData.startDate);
+    const endDate = new Date(formData.endDate);
 
-      if (startDate > endDate) {
-        throw new Error("Start date cannot be after end date");
-      }
-
-      const eventDetails = {
-        eventId: uuidv4(),
-        ...formData,
-        duration: `${formData.runTimeHour}${
-          parseInt(formData.runTimeHour) < 2 ? "hr" : "hrs"
-        } ${formData.runTimeMin}${
-          parseInt(formData.runTimeMin) < 2 ? "min" : "mins"
-        }`,
-      };
-
-      const formDataToSend = new FormData();
-      formDataToSend.append(
-        "eventDetails",
-        new Blob([JSON.stringify(eventDetails)], {
-          type: "application/json",
-        })
-      );
-
-      if (image) {
-        formDataToSend.append("image", image);
-      }
-
-      const response = await axios.post(
-        "http://192.168.120.169:8080/event/add-event",
-        formDataToSend,
-        {
-          headers: { Accept: "application/json" },
-        }
-      );
-
-      if (response.data) {
-        resetForm();
-        setMessage("Event added successfully!");
-      }
-    } catch (error: any) {
-      console.error("Submission error:", error);
-      setMessage(error.message || "Failed to submit form. Please try again.");
-    } finally {
-      setIsLoading(false);
+    if (startDate > endDate) {
+      throw new Error("Start date cannot be after end date");
     }
+
+    const eventDetails = {
+      eventId: uuidv4(),
+      ...formData,
+      duration: `${formData.runTimeHour}${
+        parseInt(formData.runTimeHour) < 2 ? "hr" : "hrs"
+      } ${formData.runTimeMin}${
+        parseInt(formData.runTimeMin) < 2 ? "min" : "mins"
+      }`,
+    };
+
+    const formDataToSend = new FormData();
+    formDataToSend.append(
+      "eventDetails",
+      new Blob([JSON.stringify(eventDetails)], {
+        type: "application/json",
+      })
+    );
+
+    if (image) {
+      formDataToSend.append("image", image);
+    }
+    const path = `event/add-event`;
+    await postEventData(path, formDataToSend)
+      .then((data) => data?.data && resetForm())
+      .then(() => setMessage("Event added successfully!"))
+      .then(() => setIsLoading(false));
   };
 
   const resetForm = () => {
@@ -177,7 +147,7 @@ const AddEvent = () => {
                 type="select"
                 value={formData.genre}
                 onChange={handleInputChange}
-                options={GENRES.map((g) => ({ value: g.name, label: g.name }))}
+                options={genres.map((g) => ({ value: g.name, label: g.name }))}
               />
 
               {/* Image Upload */}
@@ -247,6 +217,7 @@ const AddEvent = () => {
                     type="date"
                     name="endDate"
                     value={formData.endDate}
+                    min={formData.startDate}
                     onChange={handleInputChange}
                     className="rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-gray-300 focus:outline-2 focus:outline-cyan-900"
                   />
