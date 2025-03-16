@@ -315,7 +315,7 @@ const ConfirmTickets = () => {
             ))}
 
             {/* Social club checkbox */}
-            {user && user.isAdmin && (
+            {user && user.role === "ADMIN" && (
               <li className="flex py-6 sm:py-10 gap-x-3">
                 <input
                   type="checkbox"

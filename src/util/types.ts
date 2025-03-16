@@ -6,10 +6,12 @@ export interface SHOWTIME {
 }
 
 export interface USER {
-  userId: string;
-  name: string;
   email: string;
-  isAdmin: boolean;
+  mobileNo: string;
+  name: string;
+  password: string;
+  role: string;
+  userId: string;
 }
 
 export interface ADDNEWSHOWTIME {
@@ -109,8 +111,9 @@ export interface CONTACTINFORMATION {
 export interface REGISTERDATA {
   firstName: string;
   lastName: string;
-  phoneNumber: string;
+  mobileNo: string;
   email: string;
   password: string;
   confirmPassword: string;
+  isAdmin?: boolean;
 }

@@ -15,7 +15,7 @@ const ShowTimesList = ({ showTimes, setIsDialogOpen }: ChildProps) => {
     <div className="mt-10 border-t border-gray-200 pt-10">
       <div className="flex gap-x-4 items-center">
         <h3 className="text-md font-bold text-gray-900">Show Times</h3>
-        {user && user.isAdmin && (
+        {user && user.role === "ADMIN" && (
           <button
             onClick={() => setIsDialogOpen(true)}
             className="text-xs flex items-center gap-x-1 text-white bg-cyan-900 hover:bg-cyan-900 px-2 py-1 rounded-md"
@@ -51,7 +51,7 @@ const ShowTimesList = ({ showTimes, setIsDialogOpen }: ChildProps) => {
                       >
                         Book Seats
                       </Link>
-                      {user && user.isAdmin && (
+                      {user && user.role === "ADMIN" && (
                         <button>
                           <PencilSquareIcon className="w-5 text-cyan-900 hover:text-cyan-800" />
                         </button>

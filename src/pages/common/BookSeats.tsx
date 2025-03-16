@@ -24,17 +24,21 @@ interface OccupiedSeatsStorage {
   timestamp: number;
 }
 
-// Constants
-const PRICE_BY_BAND = {
-  A: 25,
-  B: 15,
-  C: 10,
-};
+interface BandConfig {
+  bandId: "A" | "B" | "C";
+  price: number;
+  seatsPerBand: number;
+}
+
+const BAND_CONFIG: BandConfig[] = [
+  { bandId: "A", price: 25, seatsPerBand: 40 },
+  { bandId: "B", price: 15, seatsPerBand: 80 },
+  { bandId: "C", price: 10, seatsPerBand: 80 },
+];
 
 // Component
 const BookSeats: React.FC = () => {
   const { eventId, showId } = useParams<{ eventId: string; showId: string }>();
-  // const [bandData, setBandData] = useState<BAND[]>([]);
   const [event, setEvent] = useState<EVENTDETAILS>();
   const [showTime, setShowTime] = useState<SHOWTIME[]>([]);
   const occupiedSeats = useLoaderData() as string[];
@@ -43,12 +47,10 @@ const BookSeats: React.FC = () => {
   const [selectedSeats, setSelectedSeats] = useState<string[]>([]);
   const [seats] = useState<Seat[]>(() => generateSeats(occupiedSeats));
 
-  // Clear localStorage on component mount
   const eventPath = `event/get-event?id=${eventId}`;
   const showTimePath = `event/${eventId}/get-show-times`;
   useEffect(() => {
     clearLocalStorage();
-    // fetchData(`${API_BASE_URL}/bands/all`, setBandData);
     getData(eventPath).then((data) => setEvent(data));
     getData(showTimePath)
       .then((data) => data && setShowTime(data))
@@ -67,7 +69,6 @@ const BookSeats: React.FC = () => {
   // Seat click handler
   const handleSeatClick = (seat: Seat) => {
     if (seat.occupied) return;
-
     setSelectedSeats((prev) =>
       prev.includes(seat.id)
         ? prev.filter((id) => id !== seat.id)
@@ -85,14 +86,21 @@ const BookSeats: React.FC = () => {
       saveToLocalStorage(eventId, showId, selectedSeats);
       navigate("confirm-tickets");
     } catch (err) {
-      // Add error handling here
+      // Add error handling
     }
   };
 
-  // Group seats by row
-  const rows = Array.from({ length: 10 }, (_, i) => i + 1).map((rowNum) =>
-    seats.filter((seat) => seat.row === rowNum)
-  );
+  const seatsPerRow = 20; // Assuming 20 seats per row as before
+  const rowsByBand = BAND_CONFIG.map((band) => ({
+    ...band,
+    rows: Math.ceil(band.seatsPerBand / seatsPerRow),
+  }));
+
+  const allRows = seats.reduce((acc: Seat[][], seat) => {
+    acc[seat.row - 1] = acc[seat.row - 1] || [];
+    acc[seat.row - 1].push(seat);
+    return acc;
+  }, []);
 
   return (
     <div className="min-h-screen text-black max-w-5xl mx-auto">
@@ -109,20 +117,14 @@ const BookSeats: React.FC = () => {
       </div>
 
       <div className="max-w-5xl mx-auto">
-        {/* Stage */}
         <StageSection />
-
-        {/* Seating Area */}
         <SeatingArea
-          rows={rows}
+          rows={allRows}
           selectedSeats={selectedSeats}
           onSeatClick={handleSeatClick}
+          bands={rowsByBand}
         />
-
-        {/* Legend */}
         <SeatLegend />
-
-        {/* Selected Seats Info */}
         {selectedSeats.length > 0 && (
           <SelectedSeatsInfo
             selectedSeats={selectedSeats}
@@ -188,48 +190,47 @@ interface SeatingAreaProps {
   onSeatClick: (seat: Seat) => void;
 }
 
+interface SeatingAreaProps {
+  rows: Seat[][];
+  selectedSeats: string[];
+  onSeatClick: (seat: Seat) => void;
+  bands: (BandConfig & { rows: number })[];
+}
+
 const SeatingArea: React.FC<SeatingAreaProps> = ({
   rows,
   selectedSeats,
   onSeatClick,
-}) => (
-  <div className="overflow-y-auto overflow-x-auto">
-    <div className="min-w-fit">
-      <div className="text-center mb-2 text-lg font-semibold">Band A</div>
-      {rows.slice(0, 2).map((rowSeats, index) => (
-        <div key={`a-${index}`}>
-          <SeatRow
-            rowSeats={rowSeats}
-            selectedSeats={selectedSeats}
-            onSeatClick={onSeatClick}
-          />
-        </div>
-      ))}
+  bands,
+}) => {
+  let currentRow = 0;
 
-      <div className="text-center mb-2 text-lg font-semibold mt-5">Band B</div>
-      {rows.slice(2, 6).map((rowSeats, index) => (
-        <div key={`b-${index}`}>
-          <SeatRow
-            rowSeats={rowSeats}
-            selectedSeats={selectedSeats}
-            onSeatClick={onSeatClick}
-          />
-        </div>
-      ))}
-
-      <div className="text-center mb-2 text-lg font-semibold mt-5">Band C</div>
-      {rows.slice(6, 10).map((rowSeats, index) => (
-        <div key={`c-${index}`}>
-          <SeatRow
-            rowSeats={rowSeats}
-            selectedSeats={selectedSeats}
-            onSeatClick={onSeatClick}
-          />
-        </div>
-      ))}
+  return (
+    <div className="overflow-y-auto overflow-x-auto">
+      <div className="min-w-fit">
+        {bands.map((band) => {
+          const bandRows = rows.slice(currentRow, currentRow + band.rows);
+          currentRow += band.rows;
+          return (
+            <div key={band.bandId}>
+              <div className="text-center mb-2 text-lg font-semibold mt-5">
+                Band {band.bandId}
+              </div>
+              {bandRows.map((rowSeats, index) => (
+                <SeatRow
+                  key={`${band.bandId}-${index}`}
+                  rowSeats={rowSeats}
+                  selectedSeats={selectedSeats}
+                  onSeatClick={onSeatClick}
+                />
+              ))}
+            </div>
+          );
+        })}
+      </div>
     </div>
-  </div>
-);
+  );
+};
 
 interface SeatRowProps {
   rowSeats: Seat[];
@@ -330,51 +331,43 @@ const SeatButton: React.FC<SeatButtonProps> = ({
 // Helper Functions
 function generateSeats(occupiedSeats: string[]): Seat[] {
   const allSeats: Seat[] = [];
+  let currentRow = 1;
 
-  // Band A: 2 rows * 20 seats = 40 seats
-  generateBandSeats("A", 1, 2, 20, occupiedSeats, allSeats);
+  BAND_CONFIG.forEach((band) => {
+    const seatsPerRow = 20;
+    const rows = Math.ceil(band.seatsPerBand / seatsPerRow);
+    let seatCounter = 1; // Counter starts at 1 for each band and continues
 
-  // Band B: 4 rows * 20 seats = 80 seats
-  generateBandSeats("B", 3, 6, 20, occupiedSeats, allSeats);
+    for (let row = 0; row < rows; row++) {
+      const seatsInThisRow = Math.min(
+        seatsPerRow,
+        band.seatsPerBand - row * seatsPerRow
+      );
 
-  // Band C: 4 rows * 20 seats = 80 seats
-  generateBandSeats("C", 7, 10, 20, occupiedSeats, allSeats);
+      for (let num = 0; num < seatsInThisRow; num++) {
+        const seatId = `${band.bandId}${seatCounter}`;
+        allSeats.push({
+          id: seatId,
+          band: band.bandId,
+          row: currentRow,
+          number: seatCounter, // Use continuous numbering
+          occupied: occupiedSeats.includes(seatId),
+        });
+        seatCounter++; // Increment for next seat
+      }
+      currentRow++; // Move to next row after completing seats in current row
+    }
+  });
 
   return allSeats;
-}
-
-function generateBandSeats(
-  band: "A" | "B" | "C",
-  startRow: number,
-  endRow: number,
-  seatsPerRow: number,
-  occupiedSeats: string[],
-  allSeats: Seat[]
-): void {
-  let seatCounter = 1;
-
-  for (let row = startRow; row <= endRow; row++) {
-    for (let num = 1; num <= seatsPerRow; num++) {
-      const seatId = `${band}${seatCounter}`;
-
-      allSeats.push({
-        id: seatId,
-        band,
-        row,
-        number: seatCounter,
-        occupied: occupiedSeats.includes(seatId),
-      });
-
-      seatCounter++;
-    }
-  }
 }
 
 function calculateTotalPrice(seats: Seat[], selectedSeats: string[]): number {
   return selectedSeats.reduce((total, seatId) => {
     const seat = seats.find((s) => s.id === seatId);
     if (!seat) return total;
-    return total + PRICE_BY_BAND[seat.band];
+    const bandConfig = BAND_CONFIG.find((b) => b.bandId === seat.band);
+    return total + (bandConfig?.price || 0);
   }, 0);
 }
 

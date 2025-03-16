@@ -13,6 +13,7 @@ interface FormInputProps {
   onChange?: any;
   maxLength?: number;
   placeholder?: string;
+  required?: boolean;
 }
 
 interface ChildProps {
@@ -50,6 +51,7 @@ const ShippingInformation = ({
           value={contactInformation.firstName}
           onChange={addressHandler}
           placeholder="Daivd"
+          required
         />
         <FormInput
           id="lastName"
@@ -58,6 +60,7 @@ const ShippingInformation = ({
           value={contactInformation.lastName}
           onChange={addressHandler}
           placeholder="Johnson"
+          required
         />
         <FormInput
           id="address"
@@ -67,6 +70,7 @@ const ShippingInformation = ({
           value={contactInformation.address}
           onChange={addressHandler}
           placeholder="123 Main St"
+          required
         />
         <FormInput
           id="apartment"
@@ -82,6 +86,7 @@ const ShippingInformation = ({
           value={contactInformation.city}
           onChange={addressHandler}
           placeholder="London"
+          required
         />
 
         <div>
@@ -124,12 +129,14 @@ const ShippingInformation = ({
           value={contactInformation.state}
           onChange={addressHandler}
           placeholder="Greater London"
+          required
         />
         <FormInput
           id="zipCode"
           label="Postal code"
           value={contactInformation.zipCode}
           onChange={addressHandler}
+          required
         />
         <FormInput
           id="phoneNumber"
@@ -140,6 +147,7 @@ const ShippingInformation = ({
           value={contactInformation.phoneNumber}
           onChange={addressHandler}
           placeholder="07123456789"
+          required
         />
       </div>
     </div>
@@ -158,6 +166,7 @@ const FormInput: React.FC<FormInputProps> = ({
   onChange,
   maxLength,
   placeholder,
+  required = false,
 }) => (
   <div className={colSpan}>
     <label htmlFor={id} className="block text-sm/6 font-medium text-gray-700">
@@ -165,7 +174,7 @@ const FormInput: React.FC<FormInputProps> = ({
     </label>
     <div className="mt-2">
       <input
-        required
+        required={required}
         id={id}
         name={id}
         type={type}

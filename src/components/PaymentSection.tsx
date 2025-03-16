@@ -52,14 +52,18 @@ const PaymentSection = ({
           : setIsCardValid((prev) => ({ ...prev, cardNumber: true }));
         break;
       case "card-expiry":
-        const formattedValue = value
+        const formattedExpiry = value
           .replace(/\D/g, "")
           .replace(/^([0-9]{2})/, "$1/");
-        setCardDetails((prev) => ({ ...prev, cardExpiry: formattedValue }));
+        setCardDetails((prev) => ({ ...prev, cardExpiry: formattedExpiry }));
         parseInt(value.slice(0, 2)) > 12 ||
         parseInt(value.substring(3, 5)) + 2000 < new Date().getFullYear()
           ? setIsCardValid((prev) => ({ ...prev, cardExpiry: false }))
           : setIsCardValid((prev) => ({ ...prev, cardExpiry: true }));
+        break;
+      case "cvc":
+        const formattedCvc = value.replace(/\D/g, "");
+        setCardDetails((prev) => ({ ...prev, cardCVC: formattedCvc }));
         break;
       default:
         break;
@@ -180,9 +184,7 @@ const PaymentSection = ({
               name="cvc"
               type="text"
               value={cardDetails.cardCVC}
-              onChange={(e) =>
-                setCardDetails((prev) => ({ ...prev, cardCVC: e.target.value }))
-              }
+              onChange={paymentDetailsHandler}
               maxLength={cardType === "Amex" ? 4 : 3}
               placeholder="123"
               className={`col-start-1 row-start-1 block w-full rounded-md bg-white px-3 py-2 text-base text-gray-900 outline-1 outline-gray-300 focus:outline-cyan-600 -outline-offset-1 placeholder:text-gray-400 focus:outline-2 focus:-outline-offset-2 sm:text-sm/6`}

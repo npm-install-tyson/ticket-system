@@ -3,7 +3,7 @@ import { useState, ChangeEvent, FormEvent } from "react";
 import FormField from "../../components/FormField";
 import { v4 as uuidv4 } from "uuid";
 import { EVENTDETAILS, GENRE } from "../../util/types";
-import { postEventData } from "../../services/api/fetchAPI";
+import { postData } from "../../services/api/fetchAPI";
 
 const genres: GENRE[] = [
   { id: 1, name: "musical" },
@@ -84,7 +84,7 @@ const AddEvent = () => {
       formDataToSend.append("image", image);
     }
     const path = `event/add-event`;
-    await postEventData(path, formDataToSend)
+    await postData(path, formDataToSend, "multipart/form-data")
       .then((data) => data?.data && resetForm())
       .then(() => setMessage("Event added successfully!"))
       .then(() => setIsLoading(false));
@@ -209,6 +209,8 @@ const AddEvent = () => {
                     type="date"
                     name="startDate"
                     value={formData.startDate}
+                    min={new Date().toISOString().split("T")[0]}
+                    max={formData.endDate}
                     onChange={handleInputChange}
                     className="rounded-md bg-white px-3 py-1.5 text-base text-gray-900 outline-1 outline-gray-300 focus:outline-2 focus:outline-cyan-900"
                   />

@@ -56,28 +56,6 @@ export default EventLists;
 
 // Loader function for when API is working
 export const loader = async () => {
-  // const token = localStorage.getItem("token"); // Add your authentication token here
-  // try {
-  //   const response =
-  //     token &&
-  //     (await fetch("http://127.0.0.1:8080/event/get-all-events", {
-  //       headers: {
-  //         "Content-Type": "application/json",
-  //         Accept: "application/json",
-  //         Authorization: `Bearer ${token}`, // Add your authentication token here
-  //       },
-  //     }));
-  //   if (response && !response.ok) {
-  //     throw new Error("Failed to fetch events");
-  //   }
-
-  //   const data = response && (await response.json());
-
-  //   return data;
-  // } catch (error) {
-  //   console.error("Error loading events:", error);
-  //   return [];
-  // }
   const path = "event/get-all-events";
   const data = await getData(path).then((data) => data || []);
   return data;

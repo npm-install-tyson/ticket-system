@@ -1,8 +1,7 @@
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
-import axios from "axios";
 import { FormEvent, useState } from "react";
-import fetchData from "../util/fetchAPI";
 import { BAND, DISCOUNT } from "../util/types";
+import { getData, postData } from "../services/api/fetchAPI";
 
 const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
   const [bandData, setBandData] = useState<BAND>({
@@ -16,39 +15,33 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
     discountPercentage: 0,
   });
 
-  const fetchURL =
-    type === "band"
-      ? `http://192.168.120.169:8080/api/v1/bands/all`
-      : `http://192.168.120.169:8080/api/v1/discounts/all-discounts`;
+  const fetchDataPath =
+    type === "band" ? `api/v1/bands/all` : `api/v1/discounts/all-discounts`;
 
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const url = `http://192.168.120.169:8080/api/v1/${
+    const postDataPath = `api/v1/${
       type === "band" ? "bands/create" : "discounts/create-discount"
     }`;
-    try {
-      // Send JSON payload instead of FormData
-      await axios.post(url, type === "band" ? bandData : discountData, {
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-      });
-    } catch (error: any) {
-      console.error("Submission error:", error);
-    } finally {
-      setOpen(false);
-      setBandData({
-        bandId: "A",
-        seatsPerBand: 20,
-        price: 0,
-      });
-      setDiscountData({
-        discountType: "CHILDREN",
-        discountPercentage: 0,
-      });
-      fetchData(fetchURL, setItems);
-    }
+
+    postData(postDataPath, type === "band" ? bandData : discountData).then(
+      (data) => {
+        if (data?.status === 200) {
+          console.log("Data sent successfully");
+          setOpen(false);
+          setBandData({
+            bandId: "A",
+            seatsPerBand: 20,
+            price: 0,
+          });
+          setDiscountData({
+            discountType: "CHILDREN",
+            discountPercentage: 0,
+          });
+          getData(fetchDataPath).then((data) => (data && setItems(data)) || []);
+        }
+      }
+    );
   };
 
   return (

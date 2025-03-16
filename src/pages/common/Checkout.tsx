@@ -1,7 +1,12 @@
 import { useEffect, useState } from "react";
 import { Radio, RadioGroup } from "@headlessui/react";
 import { CheckCircleIcon } from "@heroicons/react/20/solid";
-import { useLocation, useNavigate, useParams } from "react-router";
+import {
+  useLocation,
+  useNavigate,
+  useOutletContext,
+  useParams,
+} from "react-router";
 import {
   CARDVALIDATIONSTATE,
   CONTACTINFORMATION,
@@ -9,6 +14,7 @@ import {
   EVENTDETAILS,
   PAYMENTCARDDETAILS,
   SHOWTIME,
+  USER,
 } from "../../util/types";
 import BookingSummary from "../../components/BookingSummary";
 import PaymentSection from "../../components/PaymentSection";
@@ -40,6 +46,7 @@ const deliveryMethods: DELIVERYMETHOD[] = [
 
 const Checkout = () => {
   const { eventId, showId } = useParams();
+  const user: USER = useOutletContext();
   const [selectedDeliveryMethod, setSelectedDeliveryMethod] =
     useState<DELIVERYMETHOD>(deliveryMethods[0]);
 
@@ -143,15 +150,17 @@ const Checkout = () => {
         2
       ),
       name: contactInformation.firstName + " " + contactInformation.lastName,
-      email,
-      userId: "3e5be21e-b9ad-4bd9-8b23-0cf44e83d52e",
+      email: email,
+      userId: user.userId,
       eventId,
       showId,
       showTime: showTime[0].showTime,
       seatNumbers: selectedSeats,
     };
     postData(paymentPath, JSON.stringify(reqData)).then((data) =>
-      console.log(data)
+      data?.status === 200
+        ? navigate("success", { state: {} })
+        : alert("Failed to process payment.")
     );
   };
 

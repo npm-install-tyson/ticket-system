@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import DataTable from "../../components/DataTable";
 import ModalForm from "../../components/ModalForm";
-import fetchData from "../../util/fetchAPI";
 import { BAND } from "../../util/types";
+import { getData } from "../../services/api/fetchAPI";
 
 const ManageBands = () => {
   const [open, setOpen] = useState(false);
   const [bands, setBands] = useState<BAND[]>([]);
 
-  const url = `http://192.168.120.169:8080/api/v1/bands/all`;
+  const path = `api/v1/bands/all`;
 
   useEffect(() => {
-    fetchData(url, setBands);
+    getData(path).then((data) => (data && setBands(data)) || []);
   }, []);
 
   return (

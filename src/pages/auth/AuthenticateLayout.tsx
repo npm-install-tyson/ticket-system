@@ -1,8 +1,9 @@
-import { Outlet, useLoaderData } from "react-router";
+import { Outlet, useOutletContext } from "react-router";
 import { USER } from "../../util/types";
 
 const AuthenticateLayout = () => {
-  const user: USER = useLoaderData();
+  const user: USER = useOutletContext();
+
   return (
     <>
       <Outlet context={user} />

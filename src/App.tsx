@@ -1,16 +1,17 @@
 import { createBrowserRouter, redirect } from "react-router";
-
 import { RouterProvider } from "react-router";
 import Home from "./pages/customer/Home";
 import AdminLayout from "./pages/admin/AdminLayout";
 import AdminHome from "./pages/admin/AdminHome";
 import Layout from "./pages/customer/Layout";
 import { loader as eventLoader } from "./pages/common/EventsLists";
-import EditEventDetails from "./pages/admin/EditEventDetails";
+import EditEventDetails, {
+  loader as eventEditLoader,
+} from "./pages/admin/EditEventDetails";
 import AddEvent from "./pages/admin/AddEvent";
 import EventLists from "./pages/common/EventsLists";
 import EventDetails, {
-  loader as detailsLoader,
+  loader as eventDetailsLoader,
 } from "./pages/common/EventDetails";
 import Error from "./pages/Error";
 import BookSeats, { loader as seatLoader } from "./pages/common/BookSeats";
@@ -22,23 +23,29 @@ import About from "./pages/customer/About";
 import Login from "./pages/auth/Login";
 import AuthLayout from "./pages/auth/AuthLayout";
 import Checkout from "./pages/common/Checkout";
-import { USER } from "./util/types";
 import AuthenticateLayout from "./pages/auth/AuthenticateLayout";
+import { getData } from "./services/api/fetchAPI";
+import UserLists, { loader as usersLoader } from "./pages/admin/UserLists";
+import EditUser, { loader as editUserLoader } from "./pages/admin/EditUser";
+import AddUser from "./pages/admin/AddUser";
+import BookingDetails from "./pages/common/BookingDetails";
 
 const App = () => {
-  const fetchUser = () => {
-    // const userId = localStorage.getItem("userId");
-    // const user = userId && getData;
-    let user: USER = {
-      userId: "id-01",
-      name: "John Doe",
-      email: "john@example.com",
-      isAdmin: true,
-    };
+  const fetchUser = async () => {
+    const userId = localStorage.getItem("userId");
+    const path = `api/v1/users/${userId}`;
+    const user = userId && (await getData(path).then((data) => data && data));
+    // let user: USER = {
+    //   userId: "id-01",
+    //   name: "John Doe",
+    //   email: "john@example.com",
+    //   isAdmin: true,
+    // };
+
     return user;
   };
-  const authenticationLoader = () => {
-    const user = fetchUser();
+  const authenticationLoader = async () => {
+    const user = await fetchUser();
 
     if (!user) {
       return redirect("/auth/login");
@@ -86,7 +93,7 @@ const App = () => {
             {
               path: ":id",
               element: <EventDetails />,
-              loader: detailsLoader,
+              loader: eventDetailsLoader,
             },
             {
               path: ":eventId/:showId",
@@ -104,6 +111,10 @@ const App = () => {
                 {
                   path: "confirm-tickets/checkout",
                   element: <Checkout />,
+                },
+                {
+                  path: "confirm-tickets/checkout/success",
+                  element: <BookingDetails />,
                 },
               ],
             },
@@ -136,11 +147,12 @@ const App = () => {
             {
               path: ":id",
               element: <EventDetails />,
-              loader: detailsLoader,
+              loader: eventDetailsLoader,
             },
             {
               path: ":id/edit",
               element: <EditEventDetails />,
+              loader: eventEditLoader,
             },
             {
               path: ":eventId/:showId",
@@ -158,6 +170,10 @@ const App = () => {
                   path: "confirm-tickets/checkout",
                   element: <Checkout />,
                 },
+                {
+                  path: "confirm-tickets/checkout/success",
+                  element: <BookingDetails />,
+                },
               ],
             },
           ],
@@ -169,6 +185,25 @@ const App = () => {
         {
           path: "discounts",
           element: <ManageDiscounts />,
+        },
+        {
+          path: "users",
+          children: [
+            {
+              index: true,
+              element: <UserLists />,
+              loader: usersLoader,
+            },
+            {
+              path: "add",
+              element: <AddUser />,
+            },
+            {
+              path: ":id/edit",
+              element: <EditUser />,
+              loader: editUserLoader,
+            },
+          ],
         },
       ],
     },

@@ -1,4 +1,10 @@
-import { Link, NavLink, Outlet, useLoaderData } from "react-router";
+import {
+  Link,
+  NavLink,
+  Outlet,
+  useLoaderData,
+  useNavigate,
+} from "react-router";
 import { Dialog, DialogPanel } from "@headlessui/react";
 import { Bars3Icon, XMarkIcon } from "@heroicons/react/24/outline";
 import { useState } from "react";
@@ -79,12 +85,25 @@ const footerNavigation = {
 };
 
 const Layout = () => {
-  const user: USER = useLoaderData();
+  const [user, setUser] = useState<USER | null>(useLoaderData());
 
   const navigation = [
-    { name: "Plays", href: user && user.isAdmin ? "admin/events" : "/events" },
+    {
+      name: "Plays",
+      href: user && user.role === "ADMIN" ? "admin/events" : "/events",
+    },
     { name: "About", href: "/about" },
   ];
+
+  const navigate = useNavigate();
+
+  const signOutHandler = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    setUser(null);
+    return navigate("/");
+  };
 
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   return (
@@ -126,12 +145,20 @@ const Layout = () => {
             ))}
           </div>
           <div className="hidden lg:flex lg:flex-1 lg:justify-end">
-            <Link
-              to="auth/login"
-              className="text-sm/6 font-semibold text-gray-900"
-            >
-              Log in <span aria-hidden="true">&rarr;</span>
-            </Link>
+            {user != undefined ? (
+              <form onSubmit={signOutHandler}>
+                <button className="text-sm/6 font-semibold text-gray-900">
+                  Sign out
+                </button>
+              </form>
+            ) : (
+              <Link
+                to="auth/login"
+                className="text-sm/6 font-semibold text-gray-900"
+              >
+                Log in <span aria-hidden="true">&rarr;</span>
+              </Link>
+            )}
           </div>
         </nav>
         <Dialog
@@ -173,12 +200,20 @@ const Layout = () => {
                   ))}
                 </div>
                 <div className="py-6">
-                  <Link
-                    to="auth/login"
-                    className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
-                  >
-                    Log in
-                  </Link>
+                  {user != undefined ? (
+                    <form onSubmit={signOutHandler}>
+                      <button className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50">
+                        Sign out
+                      </button>
+                    </form>
+                  ) : (
+                    <Link
+                      to="auth/login"
+                      className="-mx-3 block rounded-lg px-3 py-2.5 text-base/7 font-semibold text-gray-900 hover:bg-gray-50"
+                    >
+                      Log in
+                    </Link>
+                  )}
                 </div>
               </div>
             </div>

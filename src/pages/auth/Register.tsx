@@ -8,31 +8,30 @@ const Register = () => {
   const [registerDetails, setRegisterDetails] = useState<REGISTERDATA>({
     firstName: "",
     lastName: "",
-    phoneNumber: "",
+    mobileNo: "",
     email: "",
     password: "",
     confirmPassword: "",
   });
-  const [blockReg, setBlockReg] = useState(false);
 
   const registerInputChangeHandler = (
     e: React.ChangeEvent<HTMLInputElement>
   ) => {
     const { id, value } = e.target;
-    if (id === "phoneNumber") {
+    if (id === "mobileNo") {
       const formattedNumber = value.replace(/\D/g, "");
-      setRegisterDetails((prev) => ({ ...prev, phoneNumber: formattedNumber }));
+      setRegisterDetails((prev) => ({ ...prev, mobileNo: formattedNumber }));
     } else {
       setRegisterDetails((prev) => ({ ...prev, [id]: value }));
     }
-    setBlockReg(registerDetails.password !== value);
   };
+  const blockReg = registerDetails.password !== registerDetails.confirmPassword;
 
   const registerHandler = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const reqData = {
       name: registerDetails.firstName + " " + registerDetails.lastName,
-      mobileNo: registerDetails.phoneNumber,
+      mobileNo: registerDetails.mobileNo,
       email: registerDetails.email,
       password: registerDetails.password,
     };
@@ -116,17 +115,17 @@ const Register = () => {
           </div>
           <div className="col-span-4">
             <label
-              htmlFor="phoneNumber"
+              htmlFor="mobileNo"
               className="block text-sm/6 font-medium text-gray-900"
             >
               Phone Number
             </label>
             <div className="mt-2">
               <input
-                id="phoneNumber"
-                name="phoneNumber"
+                id="mobileNo"
+                name="mobileNo"
                 type="text"
-                value={registerDetails.phoneNumber}
+                value={registerDetails.mobileNo}
                 onChange={registerInputChangeHandler}
                 placeholder="07123456789"
                 minLength={10}

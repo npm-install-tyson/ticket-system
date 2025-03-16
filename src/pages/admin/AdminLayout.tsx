@@ -19,6 +19,7 @@ import {
   ChevronRightIcon,
   Cog6ToothIcon,
   HomeIcon,
+  UserGroupIcon,
   WrenchScrewdriverIcon,
   XMarkIcon,
 } from "@heroicons/react/24/outline";
@@ -40,6 +41,7 @@ const navigation = [
       { name: "Add Event", href: "/admin/events/add" },
     ],
   },
+  { name: "Users", href: "/admin/users", icon: UserGroupIcon },
   {
     name: "Others",
     icon: WrenchScrewdriverIcon,
@@ -62,7 +64,7 @@ const AdminLayout = () => {
     return <Navigate to="/login" replace />;
   }
 
-  if (user && !user.isAdmin) {
+  if (user && user.role !== "ADMIN") {
     return <ProtectedLayout />;
   }
 

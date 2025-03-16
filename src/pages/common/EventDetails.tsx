@@ -1,7 +1,12 @@
 import { FormEvent, useEffect, useState } from "react";
 import { PlusCircleIcon, StarIcon } from "@heroicons/react/20/solid";
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
-import { LoaderFunctionArgs, useLoaderData } from "react-router";
+import {
+  LoaderFunctionArgs,
+  Navigate,
+  useLoaderData,
+  useOutletContext,
+} from "react-router";
 import { formatDate } from "../../util/formatdate";
 import { TrashIcon } from "@heroicons/react/24/outline";
 import Reviews from "../../components/Reviews";
@@ -52,6 +57,12 @@ const classNames = (...classes: any) => {
 
 // Component
 const EventDetails = () => {
+  const user = useOutletContext();
+
+  if (user == undefined) {
+    return <Navigate to={"/auth/login"} replace />;
+  }
+
   const [showTimes, setShowTimes] = useState<SHOWTIME[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newShowTimes, setNewShowTimes] = useState<ADDNEWSHOWTIME[]>([

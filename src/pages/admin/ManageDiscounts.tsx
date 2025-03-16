@@ -1,17 +1,17 @@
 import { useEffect, useState } from "react";
 import DataTable from "../../components/DataTable";
 import ModalForm from "../../components/ModalForm";
-import fetchData from "../../util/fetchAPI";
 import { DISCOUNT } from "../../util/types";
+import { getData } from "../../services/api/fetchAPI";
 
 const ManageDiscounts = () => {
   const [open, setOpen] = useState(false);
   const [discounts, setDiscounts] = useState<DISCOUNT[]>([]);
 
-  const url = `http://192.168.120.169:8080/api/v1/discounts/all-discounts`;
+  const path = `api/v1/discounts/all-discounts`;
 
   useEffect(() => {
-    fetchData(url, setDiscounts);
+    getData(path).then((data) => data && setDiscounts(data));
   }, []);
 
   return (
