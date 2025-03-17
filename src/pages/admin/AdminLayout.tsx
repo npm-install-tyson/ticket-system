@@ -14,10 +14,8 @@ import {
 } from "@headlessui/react";
 import {
   Bars3Icon,
-  BellIcon,
   CalendarDateRangeIcon,
   ChevronRightIcon,
-  Cog6ToothIcon,
   HomeIcon,
   UserGroupIcon,
   WrenchScrewdriverIcon,
@@ -27,7 +25,13 @@ import {
   ChevronDownIcon,
   MagnifyingGlassIcon,
 } from "@heroicons/react/20/solid";
-import { Navigate, NavLink, Outlet, useLoaderData } from "react-router";
+import {
+  Navigate,
+  NavLink,
+  Outlet,
+  useLoaderData,
+  useNavigate,
+} from "react-router";
 import { USER } from "../../util/types";
 import ProtectedLayout from "../auth/ProtectedLayout";
 
@@ -52,13 +56,9 @@ const navigation = [
   },
 ];
 
-const userNavigation = [
-  { name: "Your profile", href: "#" },
-  { name: "Sign out", href: "#" },
-];
-
 const AdminLayout = () => {
-  const user: USER = useLoaderData();
+  const [user, setUser] = useState<USER | null>(useLoaderData());
+  const navigate = useNavigate();
 
   if (user == null) {
     return <Navigate to="/login" replace />;
@@ -67,6 +67,14 @@ const AdminLayout = () => {
   if (user && user.role !== "ADMIN") {
     return <ProtectedLayout />;
   }
+
+  const signOutHandler = (e: React.FormEvent<HTMLFormElement>) => {
+    e.preventDefault();
+    localStorage.removeItem("token");
+    localStorage.removeItem("userId");
+    setUser(null);
+    return navigate("/");
+  };
 
   const [sidebarOpen, setSidebarOpen] = useState(false);
   return (
@@ -174,18 +182,6 @@ const AdminLayout = () => {
                         ))}
                       </ul>
                     </li>
-                    <li className="mt-auto">
-                      <a
-                        href="#"
-                        className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-cyan-200 hover:bg-cyan-900 hover:text-white"
-                      >
-                        <Cog6ToothIcon
-                          aria-hidden="true"
-                          className="size-6 shrink-0 text-cyan-200 group-hover:text-white"
-                        />
-                        Settings
-                      </a>
-                    </li>
                   </ul>
                 </nav>
               </div>
@@ -269,18 +265,6 @@ const AdminLayout = () => {
                     ))}
                   </ul>
                 </li>
-                <li className="mt-auto">
-                  <a
-                    href="#"
-                    className="group -mx-2 flex gap-x-3 rounded-md p-2 text-sm/6 font-semibold text-cyan-200 hover:bg-cyan-950 hover:text-white"
-                  >
-                    <Cog6ToothIcon
-                      aria-hidden="true"
-                      className="size-6 shrink-0 text-cyan-200 group-hover:text-white"
-                    />
-                    Settings
-                  </a>
-                </li>
               </ul>
             </nav>
           </div>
@@ -318,35 +302,16 @@ const AdminLayout = () => {
                 />
               </form>
               <div className="flex items-center gap-x-4 lg:gap-x-6">
-                <button
-                  type="button"
-                  className="-m-2.5 p-2.5 text-gray-400 hover:text-gray-500"
-                >
-                  <span className="sr-only">View notifications</span>
-                  <BellIcon aria-hidden="true" className="size-6" />
-                </button>
-
-                {/* Separator */}
-                <div
-                  aria-hidden="true"
-                  className="hidden lg:block lg:h-6 lg:w-px lg:bg-gray-900/10"
-                />
-
                 {/* Profile dropdown */}
                 <Menu as="div" className="relative">
                   <MenuButton className="-m-1.5 flex items-center p-1.5">
                     <span className="sr-only">Open user menu</span>
-                    <img
-                      alt=""
-                      src="https://images.unsplash.com/photo-1472099645785-5658abf4ff4e?ixlib=rb-1.2.1&ixid=eyJhcHBfaWQiOjEyMDd9&auto=format&fit=facearea&facepad=2&w=256&h=256&q=80"
-                      className="size-8 rounded-full bg-gray-50"
-                    />
                     <span className="hidden lg:flex lg:items-center">
                       <span
                         aria-hidden="true"
                         className="ml-4 text-sm/6 font-semibold text-gray-900"
                       >
-                        Tom Cook
+                        {user.name}
                       </span>
                       <ChevronDownIcon
                         aria-hidden="true"
@@ -358,16 +323,13 @@ const AdminLayout = () => {
                     transition
                     className="absolute right-0 z-10 mt-2.5 w-32 origin-top-right rounded-md bg-white py-2 ring-1 shadow-lg ring-gray-900/5 transition focus:outline-hidden data-closed:scale-95 data-closed:transform data-closed:opacity-0 data-enter:duration-100 data-enter:ease-out data-leave:duration-75 data-leave:ease-in"
                   >
-                    {userNavigation.map((item) => (
-                      <MenuItem key={item.name}>
-                        <a
-                          href={item.href}
-                          className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-gray-50 data-focus:outline-hidden"
-                        >
-                          {item.name}
-                        </a>
-                      </MenuItem>
-                    ))}
+                    <MenuItem>
+                      <form onSubmit={signOutHandler}>
+                        <button className="block px-3 py-1 text-sm/6 text-gray-900 data-focus:bg-gray-50 data-focus:outline-hidden">
+                          Sign out
+                        </button>
+                      </form>
+                    </MenuItem>
                   </MenuItems>
                 </Menu>
               </div>

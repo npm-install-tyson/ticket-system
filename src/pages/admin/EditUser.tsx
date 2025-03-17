@@ -1,4 +1,4 @@
-import { LoaderFunctionArgs, redirect, useLoaderData } from "react-router";
+import { LoaderFunctionArgs, useLoaderData, useNavigate } from "react-router";
 import { getData, putData } from "../../services/api/fetchAPI";
 import UserForm from "../../components/UserForm";
 import { useState } from "react";
@@ -6,6 +6,7 @@ import { REGISTERDATA } from "../../util/types";
 
 const EditUser = () => {
   const getUser = useLoaderData();
+  const navigate = useNavigate();
 
   const [regDetails, setRegDetails] = useState<REGISTERDATA>({
     firstName: getUser.name.split(" ")[0],
@@ -27,7 +28,7 @@ const EditUser = () => {
       password: regDetails.password,
       role: regDetails.isAdmin ? "ADMIN" : "USER",
     };
-    putData(path, reqData).then((res) => res?.data && redirect("/admin/users"));
+    putData(path, reqData).then((res) => res?.data && navigate("/admin/users"));
   };
   return (
     <UserForm

@@ -1,20 +1,19 @@
 import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
-import deleteData from "../util/deleteAPI";
+import { deleteData } from "../services/api/fetchAPI";
 
 const DataTable = ({ data, items, setItems }: any) => {
   const handleDelete = (id: number) => {
-    const deleteUrl =
-      data === "discount"
-        ? `http://192.168.120.169:8080/api/v1/discounts/${id}`
-        : `http://192.168.120.169:8080/api/v1/bands/${id}`;
+    const path =
+      data === "discount" ? `api/v1/discounts/${id}` : `api/v1/bands/${id}`;
     const confirmation = confirm(`Are you sure you want to delete?`);
-    confirmation &&
+    if (confirmation) {
+      deleteData(path).then((res) => console.log(res));
       setItems((prev: any) =>
         prev.filter((d: any) =>
           data === "band" ? d.bandId !== id : d.id !== id
         )
       );
-    confirmation && deleteData(deleteUrl);
+    }
   };
   return (
     <table className="min-w-full divide-y divide-gray-300">

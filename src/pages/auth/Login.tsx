@@ -28,6 +28,7 @@ const Login = () => {
   return (
     <>
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
+        <button onClick={() => navigate("/")}>&larr; Back</button>
         <img
           alt="Your Company"
           src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=cyan&shade=600"

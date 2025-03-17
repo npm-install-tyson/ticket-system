@@ -318,11 +318,7 @@ const SeatButton: React.FC<SeatButtonProps> = ({
   };
 
   return (
-    <div
-      className={getSeatClassName()}
-      onClick={onClick}
-      title={`Band ${seat.band} - Row ${seat.row} - Seat ${seat.number}`}
-    >
+    <div className={getSeatClassName()} onClick={onClick}>
       {seat.number}
     </div>
   );
