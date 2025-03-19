@@ -1,7 +1,6 @@
 import { PhotoIcon } from "@heroicons/react/24/solid";
-import { useState, ChangeEvent, FormEvent } from "react";
+import { useState, ChangeEvent, FormEvent, useEffect } from "react";
 import FormField from "../../components/FormField";
-import { v4 as uuidv4 } from "uuid";
 import { EVENTDETAILS, GENRE } from "../../util/types";
 import { getData, postData } from "../../services/api/fetchAPI";
 import { useLoaderData } from "react-router";
@@ -29,14 +28,38 @@ const INITIAL_FORM_STATE: EVENTDETAILS = {
 };
 
 const EditEventDetails = () => {
-  const eventOldData = useLoaderData();
-  console.log(eventOldData);
+  const eventData: EVENTDETAILS = useLoaderData();
 
-  const [formData, setFormData] = useState<EVENTDETAILS>(INITIAL_FORM_STATE);
+  console.log();
+
+  const [formData, setFormData] = useState<EVENTDETAILS>({
+    name: eventData.name,
+    description: eventData.description,
+    genre: eventData.genre,
+    startDate: eventData.startDate,
+    endDate: eventData.endDate,
+    runTimeHour: eventData.duration?.split("hrs")[0],
+    runTimeMin: eventData.duration?.split(" ")[1].split("m")[0],
+    producer: eventData.producer,
+    director: eventData.director,
+  });
   const [image, setImage] = useState<File | null>(null);
-  const [imagePreview, setImagePreview] = useState<string>("");
+  const [imagePreview, setImagePreview] = useState<any>(eventData.imageUrl);
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+
+  const urlToFile = async (imageUrl: string): Promise<File | null> => {
+    const response = await fetch(imageUrl);
+    const blob = await response.blob();
+    const mimeType = blob.type;
+
+    const fileName = `downloaded_image.${mimeType.split("/")[1]}`;
+    return new File([blob], fileName, { type: mimeType });
+  };
+
+  useEffect(() => {
+    urlToFile(imagePreview).then((res) => setImage(res));
+  }, []);
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -67,7 +90,7 @@ const EditEventDetails = () => {
     }
 
     const eventDetails = {
-      eventId: uuidv4(),
+      eventId: eventData.eventId,
       ...formData,
       duration: `${formData.runTimeHour}${
         parseInt(formData.runTimeHour) < 2 ? "hr" : "hrs"
@@ -90,7 +113,6 @@ const EditEventDetails = () => {
     const path = `event/add-event`;
     await postData(path, formDataToSend, "multipart/form-data")
       .then((data) => data?.data && resetForm())
-      .then(() => setMessage("Event added successfully!"))
       .then(() => setIsLoading(false));
   };
 
@@ -298,7 +320,7 @@ const EditEventDetails = () => {
             disabled={isLoading}
             className="inline-flex justify-center rounded-md bg-cyan-900 px-3 py-2 text-sm font-semibold text-white shadow-xs hover:bg-cyan-800 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-900 disabled:opacity-50"
           >
-            {isLoading ? "Saving..." : "Save"}
+            {isLoading ? "Updating..." : "Update"}
           </button>
         </div>
       </form>

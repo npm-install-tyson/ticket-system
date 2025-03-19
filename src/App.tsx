@@ -5,9 +5,6 @@ import AdminLayout from "./pages/admin/AdminLayout";
 import AdminHome from "./pages/admin/AdminHome";
 import Layout from "./pages/customer/Layout";
 import { loader as eventLoader } from "./pages/common/EventsLists";
-import EditEventDetails, {
-  loader as eventEditLoader,
-} from "./pages/admin/EditEventDetails";
 import AddEvent from "./pages/admin/AddEvent";
 import EventLists from "./pages/common/EventsLists";
 import EventDetails, {
@@ -148,11 +145,6 @@ const App = () => {
               path: ":id",
               element: <EventDetails />,
               loader: eventDetailsLoader,
-            },
-            {
-              path: ":id/edit",
-              element: <EditEventDetails />,
-              loader: eventEditLoader,
             },
             {
               path: ":eventId/:showId",

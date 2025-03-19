@@ -1,4 +1,4 @@
-import { PencilSquareIcon, PlusCircleIcon } from "@heroicons/react/24/outline";
+import { PlusCircleIcon } from "@heroicons/react/24/outline";
 import { formatShowtime } from "../util/formatShowtime";
 import { Link, useOutletContext } from "react-router";
 import { SHOWTIME, USER } from "../util/types";
@@ -51,11 +51,6 @@ const ShowTimesList = ({ showTimes, setIsDialogOpen }: ChildProps) => {
                       >
                         Book Seats
                       </Link>
-                      {user && user.role === "ADMIN" && (
-                        <button>
-                          <PencilSquareIcon className="w-5 text-cyan-900 hover:text-cyan-800" />
-                        </button>
-                      )}
                     </div>
                   </li>
                 );

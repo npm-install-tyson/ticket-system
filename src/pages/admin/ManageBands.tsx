@@ -30,7 +30,7 @@ const ManageBands = () => {
             type="button"
             className="block rounded-md bg-cyan-700 px-3 py-2 text-center text-sm font-semibold text-white shadow-xs hover:bg-cyan-600 focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-cyan-600"
           >
-            Add band type
+            Add/ Update Band Type
           </button>
         </div>
       </div>

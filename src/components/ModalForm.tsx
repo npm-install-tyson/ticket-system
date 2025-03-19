@@ -1,5 +1,5 @@
 import { Dialog, DialogBackdrop, DialogPanel } from "@headlessui/react";
-import { FormEvent, useState } from "react";
+import { FormEvent, useEffect, useState } from "react";
 import { BAND, DISCOUNT } from "../util/types";
 import { getData, postData } from "../services/api/fetchAPI";
 
@@ -15,6 +15,15 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
     discountPercentage: 0,
   });
 
+  const [newDiscountData, setNewDiscountData] = useState<DISCOUNT>();
+
+  const [discounts, setDiscounts] = useState<DISCOUNT[]>([]);
+
+  useEffect(() => {
+    type === "discount" &&
+      getData(fetchDataPath).then((data) => (data && setDiscounts(data)) || []);
+  }, []);
+
   const fetchDataPath =
     type === "band" ? `api/v1/bands/all` : `api/v1/discounts/all-discounts`;
 
@@ -24,24 +33,51 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
       type === "band" ? "bands/create" : "discounts/create-discount"
     }`;
 
-    postData(postDataPath, type === "band" ? bandData : discountData).then(
-      (data) => {
+    if (
+      type === "discount" &&
+      discounts.some((data) => data.discountType === discountData.discountType)
+    ) {
+      const discountId = discounts.find(
+        (data) => data.discountType === discountData.discountType
+      )?.id;
+      setNewDiscountData({
+        id: discountId,
+        discountType: discountData.discountType,
+        discountPercentage: discountData.discountPercentage,
+      });
+      postData(postDataPath, newDiscountData).then((data) => {
         if (data?.status === 200) {
           console.log("Data sent successfully");
           setOpen(false);
-          setBandData({
-            bandId: "A",
-            seatsPerBand: 20,
-            price: 0,
-          });
           setDiscountData({
             discountType: "CHILDREN",
             discountPercentage: 0,
           });
           getData(fetchDataPath).then((data) => (data && setItems(data)) || []);
         }
-      }
-    );
+      });
+    } else {
+      postData(postDataPath, type === "band" ? bandData : discountData).then(
+        (data) => {
+          if (data?.status === 200) {
+            console.log("Data sent successfully");
+            setOpen(false);
+            setBandData({
+              bandId: "A",
+              seatsPerBand: 20,
+              price: 0,
+            });
+            setDiscountData({
+              discountType: "CHILDREN",
+              discountPercentage: 0,
+            });
+            getData(fetchDataPath).then(
+              (data) => (data && setItems(data)) || []
+            );
+          }
+        }
+      );
+    }
   };
 
   return (

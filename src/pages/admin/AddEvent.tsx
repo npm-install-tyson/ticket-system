@@ -4,6 +4,7 @@ import FormField from "../../components/FormField";
 import { v4 as uuidv4 } from "uuid";
 import { EVENTDETAILS, GENRE } from "../../util/types";
 import { postData } from "../../services/api/fetchAPI";
+import { useNavigate } from "react-router";
 
 const genres: GENRE[] = [
   { id: 1, name: "musical" },
@@ -33,6 +34,7 @@ const AddEvent = () => {
   const [imagePreview, setImagePreview] = useState<string>("");
   const [message, setMessage] = useState<string>("");
   const [isLoading, setIsLoading] = useState<boolean>(false);
+  const navigate = useNavigate();
 
   const handleInputChange = (
     e: ChangeEvent<HTMLInputElement | HTMLTextAreaElement | HTMLSelectElement>
@@ -87,7 +89,8 @@ const AddEvent = () => {
     await postData(path, formDataToSend, "multipart/form-data")
       .then((data) => data?.data && resetForm())
       .then(() => setMessage("Event added successfully!"))
-      .then(() => setIsLoading(false));
+      .then(() => setIsLoading(false))
+      .then(() => navigate("/admin/events"));
   };
 
   const resetForm = () => {

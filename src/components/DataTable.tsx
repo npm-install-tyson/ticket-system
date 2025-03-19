@@ -88,10 +88,6 @@ const DataTable = ({ data, items, setItems }: any) => {
                 £{band.price}
               </td>
               <td className="relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-3 flex gap-x-2 items-center justify-center">
-                <a href="#" className="text-cyan-600 hover:text-cyan-900">
-                  <PencilSquareIcon className="w-5" />
-                  <span className="sr-only">, {band.bandId}</span>
-                </a>
                 <button
                   onClick={() => handleDelete(band.bandId)}
                   className="text-cyan-600 hover:text-cyan-900"
@@ -115,10 +111,6 @@ const DataTable = ({ data, items, setItems }: any) => {
                 {discount.discountPercentage}%
               </td>
               <td className="relative py-4 pr-4 pl-3 text-right text-sm font-medium whitespace-nowrap sm:pr-3 flex gap-x-2 items-center justify-center">
-                <button className="text-cyan-600 hover:text-cyan-900">
-                  <PencilSquareIcon className="w-5" />
-                  <span className="sr-only">Edit, {discount.discountType}</span>
-                </button>
                 <button
                   onClick={() => handleDelete(discount.id)}
                   className="text-cyan-600 hover:text-cyan-900"
