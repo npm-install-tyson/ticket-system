@@ -43,6 +43,10 @@ const Register = () => {
           email: registerDetails.email,
           password: registerDetails.password,
         };
+        if (localStorage.getItem("token") || localStorage.getItem("userId")) {
+          localStorage.removeItem("token");
+          localStorage.removeItem("userId");
+        }
         postData(loginPath, reqData).then((response) => {
           if (response && response.status === 200) {
             localStorage.setItem("token", response.data.token);

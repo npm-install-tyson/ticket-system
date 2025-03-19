@@ -29,9 +29,12 @@ export interface FEATURES {
   avatarSrc: string;
 }
 
-export interface REVIEWS {
-  average: number;
-  featured: FEATURES[];
+export interface REVIEW {
+  id?: string
+  userName: string,
+  rating: number,
+  description: string,
+  eventId?: string
 }
 
 export interface EVENTDETAILS {

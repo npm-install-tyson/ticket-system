@@ -1,5 +1,5 @@
 import axios from "axios";
-import { HOST_API_URL } from "../../util/variables";
+import { HOST_API_URL } from "../../util/apiVariables";
 
 export const getData = async (path: string) => {
   const token = localStorage.getItem("token");

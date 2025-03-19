@@ -15,6 +15,10 @@ const Login = () => {
   };
   const loginHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
+    if (localStorage.getItem("token") || localStorage.getItem("userId")) {
+      localStorage.removeItem("token");
+      localStorage.removeItem("userId");
+    }
     postData(loginPath, loginDetails).then((response) => {
       if (response && response.status === 200) {
         localStorage.setItem("token", response.data.token);
