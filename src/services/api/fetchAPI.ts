@@ -1,10 +1,11 @@
 import axios from "axios";
-import { HOST_API_URL } from "../../util/apiVariables";
+
+const apiUrl = import.meta.env.VITE_API_URL
 
 export const getData = async (path: string) => {
   const token = localStorage.getItem("token");
   try {
-    const response = await axios.get(`${HOST_API_URL}/${path}`, {
+    const response = await axios.get(`${apiUrl}/${path}`, {
       headers: {
         "Content-Type": "application/json",
         Accept: "application/json",
@@ -26,7 +27,7 @@ export const postData = async (
 ) => {
   const token = localStorage.getItem("token");
   try {
-    const response = await axios.post(`${HOST_API_URL}/${path}`, data, {
+    const response = await axios.post(`${apiUrl}/${path}`, data, {
       headers: {
         "Content-Type": contentType,
         Accept: "application/json",
@@ -45,7 +46,7 @@ export const postData = async (
 export const putData = async (path: string, data: any, contentType = "application/json") => {
   const token = localStorage.getItem("token");
   try {
-    const response = await axios.put(`${HOST_API_URL}/${path}`, data, {
+    const response = await axios.put(`${apiUrl}/${path}`, data, {
       headers: {
         "Content-Type": contentType,
         Accept: "application/json",
@@ -63,7 +64,7 @@ export const putData = async (path: string, data: any, contentType = "applicatio
 export const deleteData = async (path: string) => {
   const token = localStorage.getItem("token");
   try {
-    await axios.delete(`${HOST_API_URL}/${path}`, {
+    await axios.delete(`${apiUrl}/${path}`, {
       headers: {
         "Content-Type": "application/json",
         Authorization: `Bearer ${token}`,
