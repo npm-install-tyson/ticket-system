@@ -114,13 +114,11 @@ const Layout = () => {
           className="flex items-center justify-between p-6 lg:px-8"
         >
           <div className="flex lg:flex-1">
-            <Link to="/" className="-m-1.5 p-1.5">
-              <span className="sr-only">Your Company</span>
-              <img
-                alt=""
-                src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=cyan&shade=600"
-                className="h-8 w-auto"
-              />
+            <Link
+              to="/"
+              className="-m-1.5 p-1.5 font-extrabold text-xl text-cyan-600"
+            >
+              GCT
             </Link>
           </div>
           <div className="flex lg:hidden">

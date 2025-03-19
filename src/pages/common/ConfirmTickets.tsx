@@ -35,7 +35,8 @@ const ConfirmTickets = () => {
     counterEndTime &&
     parseInt(counterEndTime, 10) - Math.floor(Date.now() / 1000);
 
-  timeLeft &&
+  const timeoutId =
+    timeLeft &&
     setTimeout(() => {
       localStorage.removeItem("occupiedSeats");
       localStorage.removeItem("seatsByBand");
@@ -215,8 +216,10 @@ const ConfirmTickets = () => {
     };
 
     const path = "api/v1/discounts/calculate";
-    postData(path, requestData).then((data) =>
-      navigate("checkout", { state: { discount: JSON.stringify(data) } })
+    postData(path, requestData).then((res) =>
+      navigate("checkout", {
+        state: { discount: JSON.stringify(res), timeoutId },
+      })
     );
   };
 

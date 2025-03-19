@@ -112,7 +112,9 @@ const AdminLayout = () => {
               </TransitionChild>
               {/* Sidebar component */}
               <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-cyan-900 px-6 pb-4">
-                <div className="flex h-16 shrink-0 items-center">GCT</div>
+                <div className="flex h-16 shrink-0 items-center font-extrabold text-xl text-cyan-200">
+                  GCT
+                </div>
                 <nav className="flex flex-1 flex-col">
                   <ul role="list" className="flex flex-1 flex-col gap-y-7">
                     <li>
@@ -187,12 +189,8 @@ const AdminLayout = () => {
         <div className="hidden lg:fixed lg:inset-y-0 lg:z-50 lg:flex lg:w-72 lg:flex-col">
           {/* Sidebar component, swap this element with another sidebar if you like */}
           <div className="flex grow flex-col gap-y-5 overflow-y-auto bg-cyan-900 px-6 pb-4">
-            <div className="flex h-16 shrink-0 items-center">
-              <img
-                alt="Your Company"
-                src="https://tailwindui.com/plus-assets/img/logos/mark.svg?color=white"
-                className="h-8 w-auto"
-              />
+            <div className="flex h-16 shrink-0 items-center font-extrabold text-xl text-cyan-200">
+              GCT
             </div>
             <nav className="flex flex-1 flex-col">
               <ul role="list" className="flex flex-1 flex-col gap-y-7">

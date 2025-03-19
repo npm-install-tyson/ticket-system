@@ -59,6 +59,7 @@ const Checkout = () => {
 
   const location = useLocation();
   const data = JSON.parse(location.state?.discount).data;
+  const timeoutId = location.state.timeoutId;
 
   const navigate = useNavigate();
   const [seatsByBand, setSeatsByBand] = useState<SeatsByBand>({});
@@ -70,7 +71,8 @@ const Checkout = () => {
     counterEndTime &&
     parseInt(counterEndTime, 10) - Math.floor(Date.now() / 1000);
 
-  timeLeft &&
+  const newTimeoutId: any =
+    timeLeft &&
     setTimeout(() => {
       localStorage.removeItem("occupiedSeats");
       localStorage.removeItem("seatsByBand");
@@ -103,6 +105,7 @@ const Checkout = () => {
   const eventPath = `event/get-event?id=${eventId}`;
   const showTimePath = `event/${eventId}/get-show-times`;
   useEffect(() => {
+    clearTimeout(timeoutId);
     getData(eventPath).then((data) => setEvent(data));
     getData(showTimePath)
       .then((data) => data && setShowTime(data))
@@ -157,11 +160,16 @@ const Checkout = () => {
       showTime: showTime[0].showTime,
       seatNumbers: selectedSeats,
     };
-    postData(paymentPath, JSON.stringify(reqData)).then((data) =>
-      data?.status === 200
-        ? navigate("success", { state: {} })
-        : alert("Failed to process payment.")
-    );
+    postData(paymentPath, JSON.stringify(reqData)).then((data) => {
+      if (data?.status === 200) {
+        clearTimeout(newTimeoutId);
+        navigate("success", {
+          state: { ticketNumber: data.data.ticketNumber, eventId, showId },
+        });
+      } else {
+        alert("Failed to process payment.");
+      }
+    });
   };
 
   return (
