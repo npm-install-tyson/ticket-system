@@ -1,4 +1,4 @@
-import { PencilSquareIcon, TrashIcon } from "@heroicons/react/24/outline";
+import { TrashIcon } from "@heroicons/react/24/outline";
 import { deleteData } from "../services/api/fetchAPI";
 
 const DataTable = ({ data, items, setItems }: any) => {
