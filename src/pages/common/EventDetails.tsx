@@ -9,7 +9,7 @@ import {
 } from "react-router";
 import { formatDate } from "../../util/formatdate";
 import { TrashIcon } from "@heroicons/react/24/outline";
-import Reviews from "../../components/Reviews";
+// import Reviews from "../../components/Reviews";
 import ShowTimesList from "../../components/ShowTimeList";
 import {
   ADDNEWSHOWTIME,
@@ -28,7 +28,7 @@ const EventDetails = () => {
     return <Navigate to={"/auth/login"} replace />;
   }
 
-  const [reviews, setReviews] = useState<REVIEW[]>([]);
+  // const [reviews, setReviews] = useState<REVIEW[]>([]);
   const [showTimes, setShowTimes] = useState<SHOWTIME[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newShowTimes, setNewShowTimes] = useState<ADDNEWSHOWTIME[]>([
@@ -41,12 +41,12 @@ const EventDetails = () => {
   // showTimeUrl
   const showTimePath = `event/${eventDetails.eventId}/get-show-times`;
 
-  const reviewPath = `api/v1/reviews/all/${eventDetails.eventId}`;
+  // const reviewPath = `api/v1/reviews/all/${eventDetails.eventId}`;
 
   // Effects
   useEffect(() => {
     getData(showTimePath).then((data: SHOWTIME[]) => setShowTimes(data));
-    getData(reviewPath).then((data: REVIEW[]) => setReviews(data));
+    // getData(reviewPath).then((data: REVIEW[]) => setReviews(data));
   }, []);
 
   // Handlers
