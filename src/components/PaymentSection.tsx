@@ -145,7 +145,7 @@ const PaymentSection = ({
             htmlFor="card-expiry"
             className="block text-sm/6 font-medium text-gray-900"
           >
-            Card number
+            Expiry Date
           </label>
           <div className="mt-2 grid grid-cols-1">
             <input
