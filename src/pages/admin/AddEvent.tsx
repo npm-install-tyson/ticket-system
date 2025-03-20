@@ -13,7 +13,7 @@ const genres: GENRE[] = [
   { id: 4, name: "children" },
 ];
 
-const HOURS = [1, 2, 3, 4, 5];
+const HOURS = [0, 1, 2, 3, 4, 5];
 const MINUTES = Array.from({ length: 12 }, (_, i) => i * 5);
 
 const INITIAL_FORM_STATE: EVENTDETAILS = {
