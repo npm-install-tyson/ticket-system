@@ -216,7 +216,7 @@ const ConfirmTickets = () => {
     };
 
     const path = "api/v1/discounts/calculate";
-    postData(path, requestData).then((res) =>
+    postData(path, requestData).then((res: any) =>
       navigate("checkout", {
         state: { discount: JSON.stringify(res), timeoutId },
       })

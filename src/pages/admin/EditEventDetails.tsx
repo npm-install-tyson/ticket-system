@@ -112,7 +112,7 @@ const EditEventDetails = () => {
     }
     const path = `event/add-event`;
     await postData(path, formDataToSend, "multipart/form-data")
-      .then((data) => data?.data && resetForm())
+      .then((data: any) => data?.data && resetForm())
       .then(() => setIsLoading(false));
   };
 

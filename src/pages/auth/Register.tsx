@@ -36,7 +36,7 @@ const Register = () => {
       password: registerDetails.password,
     };
     const signUpPath = `api/v1/auth/signup`;
-    postData(signUpPath, reqData).then((response) => {
+    postData(signUpPath, reqData).then((response: any) => {
       if (response && (response.status === 200 || response.status <= 300)) {
         const loginPath = `api/v1/auth/login`;
         const reqData = {
@@ -47,7 +47,7 @@ const Register = () => {
           localStorage.removeItem("token");
           localStorage.removeItem("userId");
         }
-        postData(loginPath, reqData).then((response) => {
+        postData(loginPath, reqData).then((response: any) => {
           if (response && response.status === 200) {
             localStorage.setItem("token", response.data.token);
             localStorage.setItem("userId", response.data.userId);
@@ -56,6 +56,10 @@ const Register = () => {
             alert("Failed to login. Please try again.");
           }
         });
+      } else if (response.request.status === 409) {
+        alert("Email already exists. Please use a different email.");
+      } else {
+        alert("Failed to register. Please try again.");
       }
     });
   };

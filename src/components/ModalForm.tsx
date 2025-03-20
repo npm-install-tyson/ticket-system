@@ -45,7 +45,7 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
         discountType: discountData.discountType,
         discountPercentage: discountData.discountPercentage,
       });
-      postData(postDataPath, newDiscountData).then((data) => {
+      postData(postDataPath, newDiscountData).then((data: any) => {
         if (data?.status === 200) {
           console.log("Data sent successfully");
           setOpen(false);
@@ -58,7 +58,7 @@ const ModalForm = ({ setOpen, isOpen, type, setItems }: any) => {
       });
     } else {
       postData(postDataPath, type === "band" ? bandData : discountData).then(
-        (data) => {
+        (data: any) => {
           if (data?.status === 200) {
             console.log("Data sent successfully");
             setOpen(false);

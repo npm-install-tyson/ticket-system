@@ -87,7 +87,7 @@ const AddEvent = () => {
     }
     const path = `event/add-event`;
     await postData(path, formDataToSend, "multipart/form-data")
-      .then((data) => data?.data && resetForm())
+      .then((data: any) => data?.data && resetForm())
       .then(() => setMessage("Event added successfully!"))
       .then(() => setIsLoading(false))
       .then(() => navigate("/admin/events"));

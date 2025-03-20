@@ -38,8 +38,7 @@ export const postData = async (
 
     return await response;
   } catch (error) {
-    console.error("Error posting data:", error);
-    return null;
+    return error;
   }
 };
 

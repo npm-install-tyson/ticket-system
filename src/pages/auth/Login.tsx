@@ -19,7 +19,7 @@ const Login = () => {
       localStorage.removeItem("token");
       localStorage.removeItem("userId");
     }
-    postData(loginPath, loginDetails).then((response) => {
+    postData(loginPath, loginDetails).then((response: any) => {
       if (response && response.status === 200) {
         localStorage.setItem("token", response.data.token);
         localStorage.setItem("userId", response.data.userId);

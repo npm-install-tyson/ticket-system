@@ -26,8 +26,8 @@ type SeatsByBand = Record<string, number>;
 const deliveryMethods: DELIVERYMETHOD[] = [
   {
     id: 1,
-    title: "Email",
-    turnaround: "Instant",
+    title: "Booth Collection",
+    turnaround: "Self-collection",
     price: 0.0,
   },
   {
@@ -160,7 +160,7 @@ const Checkout = () => {
       showTime: showTime[0].showTime,
       seatNumbers: selectedSeats,
     };
-    postData(paymentPath, JSON.stringify(reqData)).then((data) => {
+    postData(paymentPath, JSON.stringify(reqData)).then((data: any) => {
       if (data?.status === 200) {
         clearTimeout(newTimeoutId);
         navigate("success", {

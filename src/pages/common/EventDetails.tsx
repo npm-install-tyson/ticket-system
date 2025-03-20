@@ -266,7 +266,7 @@ const EventDetails = () => {
         eventId: eventDetails.eventId,
       };
       postData(path, review).then(
-        (res) => res?.data && setUsReviewSuccess(true)
+        (res: any) => res?.data && setUsReviewSuccess(true)
       );
       setUserName("");
       setReviewDescription("");
