@@ -9,7 +9,7 @@ import {
 } from "react-router";
 import { formatDate } from "../../util/formatdate";
 import { TrashIcon } from "@heroicons/react/24/outline";
-// import Reviews from "../../components/Reviews";
+import Reviews from "../../components/Reviews";
 import ShowTimesList from "../../components/ShowTimeList";
 import {
   ADDNEWSHOWTIME,
@@ -28,25 +28,29 @@ const EventDetails = () => {
     return <Navigate to={"/auth/login"} replace />;
   }
 
-  // const [reviews, setReviews] = useState<REVIEW[]>([]);
+  const [reviews, setReviews] = useState<REVIEW[]>([]);
   const [showTimes, setShowTimes] = useState<SHOWTIME[]>([]);
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [newShowTimes, setNewShowTimes] = useState<ADDNEWSHOWTIME[]>([
     { date: "", time: "" },
   ]);
 
+  const totalRating = reviews.reduce((sum, review) => sum + review.rating, 0);
+  const averageRating = totalRating / reviews.length;
+
+  console.log(reviews);
+
   // Hooks
   const eventDetails = useLoaderData() as EVENTDETAILS;
 
   // showTimeUrl
   const showTimePath = `event/${eventDetails.eventId}/get-show-times`;
-
-  // const reviewPath = `api/v1/reviews/all/${eventDetails.eventId}`;
+  const reviewPath = `api/v1/reviews/all/${eventDetails.eventId}`;
 
   // Effects
   useEffect(() => {
     getData(showTimePath).then((data: SHOWTIME[]) => setShowTimes(data));
-    // getData(reviewPath).then((data: REVIEW[]) => setReviews(data));
+    getData(reviewPath).then((data: REVIEW[]) => setReviews(data));
   }, []);
 
   // Handlers
@@ -103,21 +107,20 @@ const EventDetails = () => {
           {eventDetails.genre}
         </p>
       </div>
-      {/* <div>
+      <div>
         <h3 className="sr-only">Reviews</h3>
         <div className="flex items-center">
           {[0, 1, 2, 3, 4].map((rating) => (
             <StarIcon
               key={rating}
               aria-hidden="true"
-              className={classNames(
-                reviews.average > rating ? "text-yellow-400" : "text-gray-300",
-                "size-5 shrink-0"
-              )}
+              className={`size-5 shrink-0 ${
+                averageRating > rating ? "text-yellow-400" : "text-gray-300"
+              }`}
             />
           ))}
         </div>
-      </div> */}
+      </div>
     </div>
   );
 
@@ -395,7 +398,7 @@ const EventDetails = () => {
 
         {/* Reviews section */}
         <div className="mx-auto mt-16 w-full max-w-2xl lg:col-span-4 lg:mt-0 lg:max-w-none">
-          {/* <Reviews featured={reviews.featured} /> */}
+          <Reviews reviews={reviews} />
         </div>
       </div>
     </div>

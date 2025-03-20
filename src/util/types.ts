@@ -4,7 +4,6 @@ export interface SHOWTIME {
   id: string;
   showTime: any;
 }
-
 export interface USER {
   email: string;
   mobileNo: string;
@@ -13,27 +12,16 @@ export interface USER {
   role: string;
   userId: string;
 }
-
 export interface ADDNEWSHOWTIME {
   date: string;
   time: string;
 }
-
-export interface FEATURES {
-  id: number;
-  rating: number;
-  content: string;
-  date: string;
-  datetime: string;
-  author: string;
-  avatarSrc: string;
-}
-
 export interface REVIEW {
-  id?: string
+  reviewId?: string
   userName: string,
   rating: number,
   description: string,
+  reviewdDate?: string;
   eventId?: string
 }
 

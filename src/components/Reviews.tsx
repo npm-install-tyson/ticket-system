@@ -1,13 +1,14 @@
 import { Tab, TabGroup, TabList, TabPanel, TabPanels } from "@headlessui/react";
 import { Fragment } from "react/jsx-runtime";
-import { FEATURES } from "../util/types";
+import { REVIEW } from "../util/types";
 import { StarIcon } from "@heroicons/react/24/solid";
+import { UserCircleIcon } from "@heroicons/react/20/solid";
 
 const classNames = (...classes: any) => {
   return classes.filter(Boolean).join(" ");
 };
 
-const Reviews = ({ featured }: { featured: FEATURES[] }) => (
+const Reviews = ({ reviews }: { reviews: REVIEW[] }) => (
   <TabGroup>
     <div className="border-b border-gray-200">
       <TabList className="-mb-px flex space-x-8">
@@ -17,17 +18,16 @@ const Reviews = ({ featured }: { featured: FEATURES[] }) => (
       </TabList>
     </div>
     <TabPanels as={Fragment}>
-      <TabPanel className="-mb-10">
+      <TabPanel className="-mb-10 overflow-scroll h-150">
         <h3 className="sr-only">Customer Reviews</h3>
 
-        {featured.map((review: FEATURES, index: number) => (
-          <div key={review.id} className="flex space-x-4 text-sm text-gray-500">
+        {reviews.map((review: REVIEW, index: number) => (
+          <div
+            key={review.reviewId}
+            className="flex space-x-4 text-sm text-gray-500"
+          >
             <div className="flex-none py-10">
-              <img
-                alt=""
-                src={review.avatarSrc}
-                className="size-10 rounded-full bg-gray-100"
-              />
+              <UserCircleIcon className="size-10 rounded-full bg-gray-100" />
             </div>
             <div
               className={classNames(
@@ -35,9 +35,9 @@ const Reviews = ({ featured }: { featured: FEATURES[] }) => (
                 "py-10"
               )}
             >
-              <h3 className="font-medium text-gray-900">{review.author}</h3>
+              <h3 className="font-medium text-gray-900">{review.userName}</h3>
               <p>
-                <time dateTime={review.datetime}>{review.date}</time>
+                <time dateTime={review.reviewdDate}>{review.reviewdDate}</time>
               </p>
 
               <div className="mt-4 flex items-center">
@@ -57,7 +57,7 @@ const Reviews = ({ featured }: { featured: FEATURES[] }) => (
               <p className="sr-only">{review.rating} out of 5 stars</p>
 
               <div
-                dangerouslySetInnerHTML={{ __html: review.content }}
+                dangerouslySetInnerHTML={{ __html: review.description }}
                 className="mt-4 text-sm/6 text-gray-500"
               />
             </div>
