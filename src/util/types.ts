@@ -108,3 +108,17 @@ export interface REGISTERDATA {
   confirmPassword: string;
   isAdmin?: boolean;
 }
+
+export interface Seat {
+  id: string;
+  band: "A" | "B" | "C";
+  row: number;
+  number: number;
+  occupied: boolean;
+}
+
+export interface BAND_CONFIG {
+  bandId: "A" | "B" | "C";
+  price: number;
+  seatsPerBand: number;
+}

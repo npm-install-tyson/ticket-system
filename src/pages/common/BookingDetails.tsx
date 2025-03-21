@@ -53,7 +53,7 @@ const BookingDetails = () => {
           {ticketData && (
             <p className="mt-2 text-base text-gray-500">
               The e-copy of your order #{ticketNumber.split("-")[0]} will be
-              delivered to you soon. THe physical copy will be delivered or can
+              delivered to you soon. The physical copy will be delivered or can
               be collected at the booth as your option.
             </p>
           )}

@@ -3,7 +3,6 @@ import {
   TicketIcon,
   UsersIcon,
 } from "@heroicons/react/24/outline";
-// import { calculateDiscount } from "../../util/discountCalculation";
 
 const AdminHome = () => {
   const topEvents = [
@@ -33,30 +32,6 @@ const AdminHome = () => {
       ticketSold: 90,
     },
   ];
-
-  // const data = {
-  //   bands: {
-  //     A: {
-  //       child: 2,
-  //       adult: 3,
-  //       pensioner: 1,
-  //     },
-  //     B: {
-  //       child: 1,
-  //       adult: 2,
-  //       pensioner: 0,
-  //     },
-  //     C: {
-  //       child: 0,
-  //       adult: 1,
-  //       pensioner: 2,
-  //     },
-  //   },
-  //   totalTickets: 12,
-  //   isSocialClub: false,
-  //   day: "Monday",
-  //   showTime: "2025-02-26T20:45:00",
-  // };
 
   return (
     <div className="mx-auto max-w-2xl lg:max-w-7xl">

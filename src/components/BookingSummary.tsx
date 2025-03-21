@@ -1,7 +1,6 @@
 import React from "react";
 import { formatShowtime } from "../util/formatShowtime";
 import TenMinuteCounter from "./Timer";
-// import { SHOWTIME } from "../util/types";
 
 const BookingSummary = ({
   event,

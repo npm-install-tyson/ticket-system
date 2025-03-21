@@ -13,6 +13,7 @@ const AddUser = () => {
     confirmPassword: "",
     isAdmin: false,
   });
+
   const submitHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     const path = "api/v1/auth/signup";
@@ -25,6 +26,7 @@ const AddUser = () => {
     };
     postData(path, reqData);
   };
+
   return (
     <UserForm
       submitHandler={submitHandler}

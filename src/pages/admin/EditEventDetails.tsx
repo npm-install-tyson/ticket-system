@@ -30,8 +30,6 @@ const INITIAL_FORM_STATE: EVENTDETAILS = {
 const EditEventDetails = () => {
   const eventData: EVENTDETAILS = useLoaderData();
 
-  console.log();
-
   const [formData, setFormData] = useState<EVENTDETAILS>({
     name: eventData.name,
     description: eventData.description,
@@ -43,6 +41,7 @@ const EditEventDetails = () => {
     producer: eventData.producer,
     director: eventData.director,
   });
+
   const [image, setImage] = useState<File | null>(null);
   const [imagePreview, setImagePreview] = useState<any>(eventData.imageUrl);
   const [message, setMessage] = useState<string>("");

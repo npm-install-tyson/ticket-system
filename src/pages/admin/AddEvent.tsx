@@ -51,12 +51,18 @@ const AddEvent = () => {
     }
   };
 
+  /**
+   * Handles the form submission for adding a new event.
+   * Validates the form data, constructs the event details, and sends it to the server.
+   *
+   * @param e - The form event triggered on submission.
+   * @returns A promise that resolves when the event is successfully added and navigates to the events page.
+   */
   const handleSubmit = async (e: FormEvent<HTMLFormElement>) => {
     e.preventDefault();
     setIsLoading(true);
     setMessage("");
 
-    // try {
     const startDate = new Date(formData.startDate);
     const endDate = new Date(formData.endDate);
 

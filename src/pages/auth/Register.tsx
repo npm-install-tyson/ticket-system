@@ -5,6 +5,7 @@ import { postData } from "../../services/api/fetchAPI";
 
 const Register = () => {
   const navigate = useNavigate();
+
   const [registerDetails, setRegisterDetails] = useState<REGISTERDATA>({
     firstName: "",
     lastName: "",
@@ -63,6 +64,7 @@ const Register = () => {
       }
     });
   };
+
   return (
     <>
       <div className="sm:mx-auto sm:w-full sm:max-w-sm">
