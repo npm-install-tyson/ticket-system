@@ -1,12 +1,14 @@
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { EVENTDETAILS, REVIEW } from "../util/types";
-import { postData } from "../services/api/fetchAPI";
+import { getData, postData } from "../services/api/fetchAPI";
 import { StarIcon } from "@heroicons/react/20/solid";
 
 export const ReviewForm = ({
   eventDetails,
+  setReviews,
 }: {
   eventDetails: EVENTDETAILS;
+  setReviews: Dispatch<SetStateAction<REVIEW[]>>;
 }) => {
   const [hover, setHover] = useState(1);
   const [rating, setRating] = useState(1);
@@ -21,16 +23,22 @@ export const ReviewForm = ({
 
   const reviewHandler = (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
-    const path = "api/v1/reviews/save";
+    const setReviewPath = "api/v1/reviews/save";
+    const getReviewPath = `api/v1/reviews/all/${eventDetails.eventId}`;
     const review: REVIEW = {
       userName: isAnonymous ? "" : userName,
       rating,
       description: reviewDescription,
       eventId: eventDetails.eventId,
     };
-    postData(path, review).then(
-      (res: any) => res?.data && setUsReviewSuccess(true)
-    );
+    postData(setReviewPath, review)
+      .then((res: any) => {
+        res?.data &&
+          getData(getReviewPath).then(
+            (res: REVIEW[]) => res && setReviews(res)
+          );
+      })
+      .then((res: any) => res?.data && setUsReviewSuccess(true));
     setUserName("");
     setReviewDescription("");
     setRating(1);

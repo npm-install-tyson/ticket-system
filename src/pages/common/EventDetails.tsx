@@ -131,7 +131,9 @@ const EventDetails = () => {
             handleAddTime={handleAddTime}
             handleRemoveTime={handleRemoveTime}
           />
-          {user.role === "USER" && <ReviewForm eventDetails={eventDetails} />}
+          {user.role === "USER" && (
+            <ReviewForm eventDetails={eventDetails} setReviews={setReviews} />
+          )}
         </div>
 
         {/* Reviews section */}
