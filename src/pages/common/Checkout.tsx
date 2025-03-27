@@ -256,7 +256,7 @@ const Checkout = () => {
               </div>
             </div>
 
-            {selectedDeliveryMethod.title !== "Email" && (
+            {selectedDeliveryMethod.title !== "Booth Collection" && (
               <ShippingInformation
                 contactInformation={contactInformation}
                 setContactInformation={setContactInformation}
